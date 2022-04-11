@@ -1,0 +1,110 @@
+
+.game {
+    display: grid;
+    grid-template: 
+    "f f" 55vh
+    "a s" 40vh
+    / 1fr 1fr;
+    margin: auto;
+}
+
+#field {
+    grid-area: f;
+    width: 70%;
+    height: 100%;
+    margin: auto;
+}
+
+#actionPane {
+    grid-area: a;
+    margin: auto;
+}
+
+
+.scoreLabel {
+    color: white;
+    margin: auto;
+}
+
+.digitDisplay {
+    display: flex;
+    height: 100%;
+    /* max-width: 100%; */
+    margin: auto;
+    justify-content: center;
+}
+
+.actionButton {
+    margin: 5px;
+}
+
+img {
+    max-height: 100%;
+}
+
+#scoreBoard {
+    /* The area of the main grid */
+    grid-area: s; 
+
+    height: 100%;
+    
+    background-color: black;
+    
+    display: grid;
+    grid-template:
+    "hd hd ad ad" 40%
+    "hl hl al al" 10%
+    "hpl hpd apl apd" 10%
+    "qd td td dd" 30%
+    "ql tl tl dl" 10%
+    / 1fr 1fr 1fr 1fr;
+}
+
+#homeLabel {
+    grid-area: hl;
+    font-size: 2em;
+}
+#homeScore {
+    grid-area: hd;
+}
+#homePenaltiesLabel {
+    grid-area: hpl;
+    margin-right: 5px;
+}
+#homePenalties {
+    grid-area: hpd;
+    margin-left: 5px;
+}
+#awayLabel {
+    grid-area: al;
+    font-size: 2em;
+}
+#awayScore {
+    grid-area: ad;
+}
+#awayPenaltiesLabel {
+    grid-area: apl;
+    margin-right: 5px;
+}
+#awayPenalties {
+    grid-area: apd;
+    margin-left: 5px;
+}
+#quarterLabel {
+    grid-area: ql;
+}
+#quarter {
+    grid-area: qd;
+}
+#timerLabel {
+    grid-area: tl;
+}
+#timer {
+    grid-area: td;
+}
+#downLabel {
+    grid-area: dl;
+}
+#down {
+    grid-area: dd;
+}

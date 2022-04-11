@@ -19,7 +19,7 @@ export function GamePicker(props) {
         <GameItem
             key={game.gameId}
             game={game}
-            onClick={() => props.setGame(game)} />);
+            onClick={() => props.setGameId(game.gameId)} />);
 
     return (
         <div>

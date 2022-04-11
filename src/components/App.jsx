@@ -7,22 +7,22 @@ import { Login } from './Login';
 
 function App() {
 
-    const [user, setUser] = useState(null);
-    const [game, setGame] = useState(null);
+    const [user, setUser] = useState("harry"); //null);
+    const [gameId, setGameId] = useState(null); //null);
 
     if (!user) {
         return <Login setUser={setUser} />;
     }
 
-    if (!game) {
+    if (!gameId) {
         return <GamePicker
-            setGame={setGame}
+            setGameId={setGameId}
             user={user} />;
     }
 
     return <Game
-        game={game}
-        setGame={setGame} />;
+        user={user}
+        gameId={gameId} />;
 }
 
 export default App;
