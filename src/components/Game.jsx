@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
-import { postAction } from "api/postAction";
+import { postAction } from "api/actions";
+import { getGame, getGames } from "api/games";
 import { useImage, getScoreImagePath } from "util/images";
 
 import 'styles/Game.css';
@@ -43,9 +44,12 @@ export function Game({user, gameId}) {
 
     useEffect(() => {
         if (!game) {
-            setGame(initGame);
+            (async () => {
+                const retrievedGame = await getGame(gameId)
+                setGame(retrievedGame);
+            })();
         }
-    }, []);
+    }, [gameId]);
 
     if (!game) {
         return <div>Loading...</div>;
@@ -57,12 +61,17 @@ export function Game({user, gameId}) {
 
     async function dispatchAction(action) {
         console.log("Action dispatched: ", action);
-        setGame({...game, ballpos: game.ballpos + 5});
-        // const newGame = await postAction(game.gameId, user, action);
-        // setGame(newGame);
-    }
+        console.log(game.gameId);
+        const response = await postAction(game.gameId, user, action);
 
-    // return <ScoreBoard game={game} />;
+        if (response.status == 400) {
+            console.log(response);
+            window.alert("Illegal action");
+        }
+        else {
+            setGame(response.data);
+        }
+    }
 
     return (
         <div className="game" >
@@ -139,41 +148,52 @@ function yardsToPixels(yards, canvasWidth) {
     return yards * (canvasWidth/120);
 }
 
-function ScoreBoard({game, width, height}) {
+function ScoreBoard({game}) {
+
+    // since plays 1-20 are in quarter 1, shift everything up 19 to line it up
+    const quarter = Math.floor((game.playNum + 19)/20);
+
     return (
         <div id="scoreBoard" >
             <ScoreLabel id="homeLabel" label="HOME" />
-            <DoubleDigitDisplay id="homeScore" />
+            <DoubleDigitDisplay id="homeScore" num={game.score.home} />
             <ScoreLabel id="homePenaltiesLabel" label="PEN" />
-            <DigitDisplay id="homePenalties" />
+            <DigitDisplay id="homePenalties" digit={game.penalties.home} />
 
             <ScoreLabel id="awayLabel" label="AWAY" />
-            <DoubleDigitDisplay id="awayScore" />
+            <DoubleDigitDisplay id="awayScore" num={game.score.away} />
             <ScoreLabel id="awayPenaltiesLabel" label="PEN" />
-            <DigitDisplay id="awayPenalties" />
+            <DigitDisplay id="awayPenalties" digit={game.penalties.away} />
 
             <ScoreLabel id="quarterLabel" label="QTR" />
-            <DigitDisplay id="quarter" />
+            <DigitDisplay id="quarter" digit={quarter} />
 
             <ScoreLabel id="timerLabel" label="TIME" />
-            <DoubleDigitDisplay id="timer" />
+            <DoubleDigitDisplay id="timer" num={game.playNum} />
 
             <ScoreLabel id="downLabel" label="DOWN" />
-            <DigitDisplay id="down" />
+            <DigitDisplay id="down" digit={game.down} />
             
         </div>
     );
 }
 
 function DigitDisplay({digit, id}) {
-    return <img className="digitDisplay" src="score/0.png" alt={0} id={id} />;
+        return <img className="digitDisplay"
+                src={getScoreImagePath(digit)}
+                alt={digit}
+                id={id} />;
 }
 
 function DoubleDigitDisplay({num, id}) {
+
+    const ones = num % 10;
+    const tens = Math.floor(num/10);
+
     return (
-        <div id={id} className="digitDisplay" >
-            <img src={getScoreImagePath(4)} alt={0} id={id} />
-            <img src={getScoreImagePath(3)} alt={0} id={id} />
+        <div id={id} className="digitDisplay" alt={num} >
+            <img src={getScoreImagePath(tens)} id={id} />
+            <img src={getScoreImagePath(ones)} id={id} />
         </div>
     );
 }

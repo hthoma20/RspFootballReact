@@ -1,32 +1,52 @@
 import { useEffect, useState } from 'react';
 
-import { getGames } from 'api/getGames';
+import { getGames } from 'api/games';
+import { joinGame } from 'api/actions';
 
 
-export function GamePicker(props) {
+export function GamePicker({user, setGameId}) {
 
-    const [games, setGames] = useState([]);
+    const [games, setGames] = useState(null);
 
     useEffect(() => {
         (async () => {
-            const games = await getGames();
-            console.log(games);
-            setGames(games);
+            const fetchedGames = await getGames();
+            setGames(fetchedGames);
         })();
     }, []);
 
-    const gameComponents = games.map(game =>
-        <GameItem
-            key={game.gameId}
-            game={game}
-            onClick={() => props.setGameId(game.gameId)} />);
+    async function attemptJoinGame(gameId) {
+        const result = await joinGame(user, gameId);
+
+        if (result.status == 200) {
+            setGameId(gameId);
+        }
+        else {
+            window.alert("Couldn't join that game.\n Try to refresh the game list, and ensure that the home team doesn't share your name.");
+        }
+    }
 
     return (
         <div>
-            <Heading user={props.user} />
-            {gameComponents}
+            <Heading user={user} />
+            <GamesList games={games} attemptJoinGame={attemptJoinGame} />
         </div>
     );
+}
+
+function GamesList({games, attemptJoinGame}) {
+    if (games == null) {
+        return <div>Loading...</div>
+    }
+
+    if (games.length == 0) {
+        return <div>There are no games yet. Try to make a new one.</div>
+    }
+    return games.map(game =>
+        <GameItem
+            key={game.gameId}
+            game={game}
+            onClick={() => attemptJoinGame(game.gameId)} />);
 }
 
 function Heading(props) {

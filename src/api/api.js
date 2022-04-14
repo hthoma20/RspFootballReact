@@ -9,7 +9,10 @@ function getEndpoint(route) {
 
 export async function getRequest(route) {
     const response = await fetch(getEndpoint(route));
-    return response.json();
+    return {
+        status: response.status,
+        data: response.json()
+    };
 }
 
 export async function postRequest(route, body) {
@@ -17,6 +20,8 @@ export async function postRequest(route, body) {
         method: 'POST',
         body: JSON.stringify(body)
     });
-
-    return response.json();
+    return {
+        status: response.status,
+        data: await response.json()
+    };
 }
