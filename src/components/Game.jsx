@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { postAction } from "api/actions";
-import { getGame, getGames } from "api/games";
+import { getGame, pollGame } from "api/games";
 import { useImage, getScoreImagePath } from "util/images";
 
 import 'styles/Game.css';
@@ -25,8 +25,8 @@ const initGame = {
         'home': 2,
         'away': 2
     },
-    'playNum': 1,
-    'currentPlay': 'COIN_TOSS',
+    'playCount': 1,
+    'play': 'COIN_TOSS',
     'rsp': {
         'home': null,
         'away': null
@@ -36,6 +36,14 @@ const initGame = {
         'home': 'RSP',
         'away': 'RSP'
     }
+}
+
+function getPlayer(game, user) {
+    return game.players.home == user ? 'home' : 'away';
+}
+
+function getOpponent(player) {
+    return player == 'home' ? 'away' : 'home';
 }
 
 export function Game({user, gameId}) {
@@ -49,7 +57,13 @@ export function Game({user, gameId}) {
                 setGame(retrievedGame);
             })();
         }
-    }, [gameId]);
+        else if (game.actions[getPlayer(game, user)].includes('POLL')) {
+            (async () => {
+                const retrievedGame = await pollGame(gameId, game.version)
+                setGame(retrievedGame);
+            })();
+        }
+    });
 
     if (!game) {
         return <div>Loading...</div>;
@@ -57,7 +71,7 @@ export function Game({user, gameId}) {
 
     console.log("Rendering game: ", game);
 
-    const player = game.players.home == user ? 'home' : 'away';
+    const player = getPlayer(game, user);
 
     async function dispatchAction(action) {
         console.log("Action dispatched: ", action);
@@ -127,7 +141,7 @@ function Field({game}) {
         ctx.font = "30px Arial";
         ctx.fillStyle = '#000';
         ctx.textAlign = 'center';
-        ctx.fillText(game.currentPlay, canvas.width/2, 0.3*canvas.height);
+        ctx.fillText(game.play, canvas.width/2, 0.3*canvas.height);
 
     }, [game, fieldLoaded, ballLoaded]);
 
@@ -169,7 +183,7 @@ function ScoreBoard({game}) {
             <DigitDisplay id="quarter" digit={quarter} />
 
             <ScoreLabel id="timerLabel" label="TIME" />
-            <DoubleDigitDisplay id="timer" num={game.playNum} />
+            <DoubleDigitDisplay id="timer" num={game.playCount} />
 
             <ScoreLabel id="downLabel" label="DOWN" />
             <DigitDisplay id="down" digit={game.down} />
@@ -208,6 +222,13 @@ function ActionPane({game, player, dispatchAction}) {
     if (actions.includes('RSP')) {
         return <RspPane dispatchAction={dispatchAction} />;
     }
+    if (actions.includes('KICKOFF_ELECTION')) {
+        return <KickoffElectionPane dispatchAction={dispatchAction} />
+    }
+    if (actions.includes('POLL')) {
+        const opponentAction = game.actions[getOpponent(player)];
+        return <div>Waiting for opponent: {opponentAction}</div>
+    }
 }
 
 function RspPane({dispatchAction}) {
@@ -221,9 +242,25 @@ function RspPane({dispatchAction}) {
 
     return (
         <div>
-            <ActionButton onClick={() => dispatchRspAction('rock')}>ROCK</ActionButton>
-            <ActionButton onClick={() => dispatchRspAction('paper')}>PAPER</ActionButton>
-            <ActionButton onClick={() => dispatchRspAction('scissors')}>SCISSORS</ActionButton>
+            <ActionButton onClick={() => dispatchRspAction('ROCK')}>ROCK</ActionButton>
+            <ActionButton onClick={() => dispatchRspAction('PAPER')}>PAPER</ActionButton>
+            <ActionButton onClick={() => dispatchRspAction('SCISSORS')}>SCISSORS</ActionButton>
+        </div>
+    );
+}
+
+function KickoffElectionPane({dispatchAction}) {
+    function dispatchKickoffAction(choice) {
+        dispatchAction({
+            name: 'KICKOFF_ELECTION',
+            choice: choice
+        });
+    }
+
+    return (
+        <div>
+            <ActionButton onClick={() => dispatchKickoffAction('KICK')}>KICK</ActionButton>
+            <ActionButton onClick={() => dispatchKickoffAction('RECIEVE')}>RECIEVE</ActionButton>
         </div>
     );
 }
