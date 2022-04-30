@@ -8,7 +8,7 @@ import { Login } from './Login';
 function App() {
 
     const [user, setUser] = useState(null);
-    const [gameId, setGameId] = useState('abc');
+    const [gameId, setGameId] = useState('test_default_id');
 
     if (!user) {
         return <Login setUser={setUser} />;

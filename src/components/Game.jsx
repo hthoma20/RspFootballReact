@@ -89,7 +89,7 @@ export function Game({user, gameId}) {
 
     return (
         <div className="game" >
-            <Field game={game} width={700} height={300}/>
+            <Field game={game} player={player} width={700} height={300}/>
             <div id="actionPane" >
                 <ActionPane game={game} player={player} dispatchAction={dispatchAction} />
             </div>
@@ -98,7 +98,7 @@ export function Game({user, gameId}) {
     );
 }
 
-function Field({game}) {
+function Field({game, player}) {
     
     const canvasRef = useRef(null);
     const [fieldImage, fieldLoaded] = useImage('field.png');
@@ -120,7 +120,8 @@ function Field({game}) {
         ctx.drawImage(fieldImage, 0, 0, canvas.width, canvas.height);
 
         // draw ball
-        const ballPixelPos = yardLineToPixels(game.ballpos, canvas.width);
+        const ballpos = game.possession == player ? game.ballpos : 100 - game.ballpos;
+        const ballPixelPos = yardLineToPixels(ballpos, canvas.width);
         const ballWidth = yardsToPixels(5, canvas.width);
         const ballHeight = .67*ballWidth;
         ctx.drawImage(ballImage,
@@ -129,7 +130,8 @@ function Field({game}) {
             ballWidth, ballHeight);
 
         // draw first down
-        const firstDownPixelPos = yardLineToPixels(game.firstDown, canvas.width);
+        const firstDownPos = game.possession == player ? game.firstDown : 100 - game.firstDown;
+        const firstDownPixelPos = yardLineToPixels(firstDownPos, canvas.width);
         ctx.beginPath();
         ctx.moveTo(firstDownPixelPos, 0);
         ctx.lineTo(firstDownPixelPos, canvas.height);
@@ -225,6 +227,18 @@ function ActionPane({game, player, dispatchAction}) {
     if (actions.includes('KICKOFF_ELECTION')) {
         return <KickoffElectionPane dispatchAction={dispatchAction} />
     }
+    if (actions.includes('KICKOFF_CHOICE')) {
+        return <KickoffChoicePane dispatchAction={dispatchAction} />;
+    }
+    if (actions.includes('TOUCHBACK_CHOICE')) {
+        return <TouchbackChoicePane dispatchAction={dispatchAction} />;
+    }
+    if (actions.includes('ROLL')) {
+        return <RollPane dispatchAction={dispatchAction} game={game} />;
+    }
+    if (actions.includes('CALL_PLAY')) {
+        return <CallPlayPane dispatchAction={dispatchAction} game={game} />;
+    }
     if (actions.includes('POLL')) {
         const opponentAction = game.actions[getOpponent(player)];
         return <div>Waiting for opponent: {opponentAction}</div>
@@ -233,38 +247,111 @@ function ActionPane({game, player, dispatchAction}) {
 
 function RspPane({dispatchAction}) {
 
-    function dispatchRspAction(choice) {
-        dispatchAction({
-            name: 'RSP',
-            choice: choice
-        });
-    }
+    const dispatch = getChoiceActionDispatch(dispatchAction, 'RSP');
 
     return (
         <div>
-            <ActionButton onClick={() => dispatchRspAction('ROCK')}>ROCK</ActionButton>
-            <ActionButton onClick={() => dispatchRspAction('PAPER')}>PAPER</ActionButton>
-            <ActionButton onClick={() => dispatchRspAction('SCISSORS')}>SCISSORS</ActionButton>
+            <ActionButton onClick={() => dispatch('ROCK')}>ROCK</ActionButton>
+            <ActionButton onClick={() => dispatch('PAPER')}>PAPER</ActionButton>
+            <ActionButton onClick={() => dispatch('SCISSORS')}>SCISSORS</ActionButton>
         </div>
     );
 }
 
 function KickoffElectionPane({dispatchAction}) {
-    function dispatchKickoffAction(choice) {
-        dispatchAction({
-            name: 'KICKOFF_ELECTION',
-            choice: choice
-        });
-    }
+    const dispatch = getChoiceActionDispatch(dispatchAction, 'KICKOFF_ELECTION');
 
     return (
         <div>
-            <ActionButton onClick={() => dispatchKickoffAction('KICK')}>KICK</ActionButton>
-            <ActionButton onClick={() => dispatchKickoffAction('RECIEVE')}>RECIEVE</ActionButton>
+            <ActionButton onClick={() => dispatch('KICK')}>KICK</ActionButton>
+            <ActionButton onClick={() => dispatch('RECIEVE')}>RECIEVE</ActionButton>
         </div>
     );
 }
 
+function KickoffChoicePane({dispatchAction}) {
+    const dispatch = getChoiceActionDispatch(dispatchAction, 'KICKOFF_CHOICE');
+
+    return (
+        <div>
+            <ActionButton onClick={() => dispatch('REGULAR')}>REGULAR</ActionButton>
+            <ActionButton onClick={() => dispatch('ONSIDE')}>ONSIDE</ActionButton>
+        </div>
+    );
+}
+
+function TouchbackChoicePane({dispatchAction}) {
+    const dispatch = getChoiceActionDispatch(dispatchAction, 'TOUCHBACK_CHOICE');
+
+    return (
+        <div>
+            <ActionButton onClick={() => dispatch('TOUCHBACK')}>TOUCHBACK</ActionButton>
+            <ActionButton onClick={() => dispatch('ROLL')}>ROLL</ActionButton>
+        </div>
+    );
+}
+
+function RollPane({dispatchAction, game}) {
+
+    function dispatchRollAction(count) {
+        dispatchAction({
+            name: "ROLL",
+            count: count
+        });
+    }
+
+    let count = 1;
+    switch (game.state) {
+        case 'KICKOFF':
+
+    }
+    
+    const rollButtons = getDieCountChoices(game).map(count =>
+        <ActionButton key={count} onClick={() => dispatchRollAction(count)}>{count}</ActionButton>);
+
+    return (
+        <div>
+            <span>Roll:</span>
+            {rollButtons}
+        </div>
+    );
+}
+
+function getDieCountChoices(game) {
+    switch (game.state) {
+        case 'KICKOFF':
+            return [3];
+        case 'ONSIDE_KICK':
+            return [2];
+        case 'KICK_RETURN':
+            return [1];
+    }
+}
+
+function CallPlayPane({dispatchAction, game}) {
+    
+    function dispatchPlayAction(play) {
+        dispatchAction({
+            name: "CALL_PLAY",
+            play: play
+        });
+    }
+    
+    return (
+        <div>
+            <ActionButton onClick={() => dispatchPlayAction('SHORT_RUN')}>SHORT RUN</ActionButton>
+        </div>
+    );
+}
+
+function getChoiceActionDispatch(dispatchAction, choiceName) {
+    return (choice) => {
+        dispatchAction({
+            name: choiceName,
+            choice: choice
+        })
+    }
+}
 
 function ActionButton(props) {
     return (
