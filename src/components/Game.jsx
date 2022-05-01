@@ -103,10 +103,11 @@ function Field({game, player}) {
     const canvasRef = useRef(null);
     const [fieldImage, fieldLoaded] = useImage('field.png');
     const [ballImage, ballLoaded] = useImage('football.png');
+    const [diceImage, diceLoaded] = useImage('dice.png');
 
     useEffect(() => {
 
-        if (!(fieldLoaded && ballLoaded)) {
+        if (!(fieldLoaded && ballLoaded && diceLoaded)) {
             return;
         }
 
@@ -139,17 +140,50 @@ function Field({game, player}) {
         ctx.lineWidth = 5;
         ctx.stroke();
 
+        // draw dice
+        if (game.result.name == 'ROLL') {
+            const dieX = 20;
+            const dieY = 20;
+            const width = ballWidth + 10;
+            for (let i = 0; i < game.result.roll.length; i++) {
+                const x = dieX + i*width;
+                drawDie(ctx, diceImage, game.result.roll[i], x, dieY, ballWidth);
+            }
+        }
+
         // display current play
         ctx.font = "30px Arial";
         ctx.fillStyle = '#000';
         ctx.textAlign = 'center';
         ctx.fillText(game.play, canvas.width/2, 0.3*canvas.height);
 
-    }, [game, fieldLoaded, ballLoaded]);
+    }, [game, fieldLoaded, ballLoaded, diceLoaded]);
 
     return (
         <canvas id="field" ref={canvasRef} />
     );
+}
+
+function drawDie(ctx, image, value, x, y, dimension) {
+    // the source image is a grid with dimension 640*427 pixels, with each die image
+    // arranged as below
+    // 1 2 3
+    // 4 5 6
+    const clipWidth = 213;
+    const clipHeight = 213;
+
+    const clipX = ((value-1) % 3) * clipWidth;
+    const clipY =  value < 4 ? 0 : clipHeight;
+
+    ctx.drawImage(image,
+        clipX,
+        clipY,
+        clipWidth,
+        clipHeight,
+        x,
+        y,
+        dimension,
+        dimension);
 }
 
 // return the number of pixels from the left of the canvas
