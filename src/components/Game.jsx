@@ -141,7 +141,7 @@ function Field({game, player}) {
         ctx.stroke();
 
         // draw dice
-        if (game.result.name == 'ROLL') {
+        if (game.result?.name == 'ROLL') {
             const dieX = 20;
             const dieY = 20;
             const width = ballWidth + 10;
