@@ -6,37 +6,7 @@ import { useImage, getScoreImagePath } from "util/images";
 
 import 'styles/Game.css';
 
-const initGame = {
-    'gameId': "fun game",
-    'version': 0,
-    'players': {
-        'home': 'harry',
-        'away': 'john',
-    },
-    'state': 'RSP',
-    'ballpos': 35,
-    'firstDown': 45,
-    'down': 2,
-    'score': {
-        'home': 0,
-        'away': 0
-    },
-    'penalties': {
-        'home': 2,
-        'away': 2
-    },
-    'playCount': 1,
-    'play': 'COIN_TOSS',
-    'rsp': {
-        'home': null,
-        'away': null
-    },
-    'roll': [],
-    'actions': {
-        'home': 'RSP',
-        'away': 'RSP'
-    }
-}
+const POLL_ON = false;
 
 function getPlayer(game, user) {
     return game.players.home == user ? 'home' : 'away';
@@ -57,7 +27,7 @@ export function Game({user, gameId}) {
                 setGame(retrievedGame);
             })();
         }
-        else if (game.actions[getPlayer(game, user)].includes('POLL')) {
+        else if (POLL_ON && game.actions[getPlayer(game, user)].includes('POLL')) {
             (async () => {
                 const retrievedGame = await pollGame(gameId, game.version)
                 setGame(retrievedGame);
@@ -112,8 +82,20 @@ function Field({game, player}) {
         }
 
         const canvas = canvasRef.current;
-        canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
+
+        // scale the canvas appropriately for the pixel ratio
+        // see https://medium.com/wdstack/fixing-html5-2d-canvas-blur-8ebe27db07da
+        (function fix_dpi() {
+            const dpi = window.devicePixelRatio;
+            const style = getComputedStyle(canvas);
+            console.log(style);
+            console.log(canvas);
+            const style_width = Number(style.width.match(/(.*)px/)[1]);
+            const style_height = Number(style.height.match(/(.*)px/)[1]);
+            
+            canvas.width = style_width * dpi;
+            canvas.height = style_height * dpi;
+        })();
 
         const ctx = canvas.getContext('2d');
         

@@ -1,11 +1,21 @@
 
 .game {
+    width: 70vw;
+    height: 70vh;
+
     display: grid;
     grid-template: 
-    "f f" 55vh
-    "a s" 40vh
+    "a s" 50%
+    "f f" 50%
     / 1fr 1fr;
+
     margin: auto;
+    margin-top: 10vh;
+
+    border-style: solid;
+    border-width: 10px;
+    border-color: black;
+    border-radius: 10px;
 }
 
 #field {
