@@ -201,7 +201,7 @@ function yardsToPixels(yards, canvasWidth) {
 function ScoreBoard({game}) {
 
     // since plays 1-20 are in quarter 1, shift everything up 19 to line it up
-    const quarter = Math.floor((game.playNum + 19)/20);
+    const quarter = Math.floor((game.playCount + 19)/20);
 
     return (
         <div id="scoreBoard" >
