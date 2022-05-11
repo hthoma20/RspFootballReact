@@ -74,6 +74,9 @@ function Field({game, player}) {
     const [fieldImage, fieldLoaded] = useImage('field.png');
     const [ballImage, ballLoaded] = useImage('football.png');
     const [diceImage, diceLoaded] = useImage('dice.png');
+    const [rockImage, rockLoaded] = useImage('rock.png');
+    const [scissorsImage, scissorsLoaded] = useImage('scissors.png');
+    const [paperImage, paperLoaded] = useImage('paper.png');
 
     useEffect(() => {
 
@@ -133,13 +136,24 @@ function Field({game, player}) {
             }
         }
 
+        // draw RSP
+        if (game.result?.name == 'RSP') {
+            drawRsp(ctx,
+                    {rock: rockImage, scissors: scissorsImage, paper: paperImage},
+                    game.result,
+                    yardLineToPixels(-5, canvas.width),
+                    yardLineToPixels(100, canvas.width),
+                    canvas.height/2,
+                    ballWidth*2);
+        }
+
         // display current play
         ctx.font = "30px Arial";
         ctx.fillStyle = '#000';
         ctx.textAlign = 'center';
         ctx.fillText(game.play, canvas.width/2, 0.3*canvas.height);
 
-    }, [game, fieldLoaded, ballLoaded, diceLoaded]);
+    }, [game, fieldLoaded, ballLoaded, diceLoaded, rockLoaded, scissorsLoaded, paperLoaded]);
 
     return (
         <canvas id="field" ref={canvasRef} />
@@ -166,6 +180,19 @@ function drawDie(ctx, image, value, x, y, dimension) {
         y,
         dimension,
         dimension);
+}
+
+function drawRsp(ctx, images, result, homeX, awayX, y, width) {
+    function getImage(choice) {
+        switch (choice) {
+            case 'ROCK': return images.rock;
+            case 'SCISSORS': return images.scissors;
+            case 'PAPER': return images.paper;
+        }
+    }
+
+    ctx.drawImage(getImage(result.home), homeX, y, width, width);
+    ctx.drawImage(getImage(result.away), awayX, y, width, width);
 }
 
 // return the number of pixels from the left of the canvas
