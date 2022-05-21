@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { postAction } from "api/actions";
 import { getGame, pollGame } from "api/games";
 import { useImage, getScoreImagePath } from "util/images";
+import { getDieCountChoices } from "util/actions";
+import * as Robot from 'bot/Robot';
 
 import 'styles/Game.css';
 
@@ -55,6 +57,10 @@ export function Game({user, gameId}) {
         else {
             setGame(response.data);
         }
+    }
+
+    if (user == 'daylin') {
+        Robot.takeAction(game, player, dispatchAction);
     }
 
     return (
@@ -116,14 +122,16 @@ function Field({game, player}) {
             ballWidth, ballHeight);
 
         // draw first down
-        const firstDownPos = game.possession == player ? game.firstDown : 100 - game.firstDown;
-        const firstDownPixelPos = yardLineToPixels(firstDownPos, canvas.width);
-        ctx.beginPath();
-        ctx.moveTo(firstDownPixelPos, 0);
-        ctx.lineTo(firstDownPixelPos, canvas.height);
-        ctx.strokeStyle = '#efe410';
-        ctx.lineWidth = 5;
-        ctx.stroke();
+        if (game.firstDown) {
+            const firstDownPos = game.possession == player ? game.firstDown : 100 - game.firstDown;
+            const firstDownPixelPos = yardLineToPixels(firstDownPos, canvas.width);
+            ctx.beginPath();
+            ctx.moveTo(firstDownPixelPos, 0);
+            ctx.lineTo(firstDownPixelPos, canvas.height);
+            ctx.strokeStyle = '#efe410';
+            ctx.lineWidth = 5;
+            ctx.stroke();
+        }
 
         // draw dice
         if (game.result?.name == 'ROLL') {
@@ -360,17 +368,7 @@ function RollPane({dispatchAction, game}) {
     );
 }
 
-function getDieCountChoices(game) {
-    switch (game.state) {
-        case 'KICKOFF':
-            return [3];
-        case 'ONSIDE_KICK':
-            return [2];
-        case 'KICK_RETURN':
-        case 'SACK_ROLL':
-            return [1];
-    }
-}
+
 
 function CallPlayPane({dispatchAction, game}) {
     
