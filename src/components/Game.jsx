@@ -6,7 +6,7 @@ import { useImage, getScoreImagePath } from "util/images";
 
 import 'styles/Game.css';
 
-const POLL_ON = false;
+const POLL_ON = true;
 
 function getPlayer(game, user) {
     return game.players.home == user ? 'home' : 'away';
@@ -367,6 +367,7 @@ function getDieCountChoices(game) {
         case 'ONSIDE_KICK':
             return [2];
         case 'KICK_RETURN':
+        case 'SACK_ROLL':
             return [1];
     }
 }
