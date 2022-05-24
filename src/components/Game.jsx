@@ -9,6 +9,7 @@ import * as Robot from 'bot/Robot';
 import 'styles/Game.css';
 
 const POLL_ON = true;
+const ROBOT_ON = true;
 
 function getPlayer(game, user) {
     return game.players.home == user ? 'home' : 'away';
@@ -59,7 +60,7 @@ export function Game({user, gameId}) {
         }
     }
 
-    if (user == 'daylin') {
+    if (ROBOT_ON && user == 'daylin') {
         Robot.takeAction(game, player, dispatchAction);
     }
 
@@ -97,8 +98,6 @@ function Field({game, player}) {
         (function fix_dpi() {
             const dpi = window.devicePixelRatio;
             const style = getComputedStyle(canvas);
-            console.log(style);
-            console.log(canvas);
             const style_width = Number(style.width.match(/(.*)px/)[1]);
             const style_height = Number(style.height.match(/(.*)px/)[1]);
             
@@ -134,21 +133,23 @@ function Field({game, player}) {
         }
 
         // draw dice
-        if (game.result?.name == 'ROLL') {
+        const rollResult = game.result.find(result => result.name == 'ROLL');
+        if (rollResult) {
             const dieX = 20;
             const dieY = 20;
             const width = ballWidth + 10;
-            for (let i = 0; i < game.result.roll.length; i++) {
+            for (let i = 0; i < rollResult.roll.length; i++) {
                 const x = dieX + i*width;
-                drawDie(ctx, diceImage, game.result.roll[i], x, dieY, ballWidth);
+                drawDie(ctx, diceImage, rollResult.roll[i], x, dieY, ballWidth);
             }
         }
 
         // draw RSP
-        if (game.result?.name == 'RSP') {
+        const rspResult = game.result.find(result => result.name == 'RSP');
+        if (rspResult) {
             drawRsp(ctx,
                     {rock: rockImage, scissors: scissorsImage, paper: paperImage},
-                    game.result,
+                    rspResult,
                     yardLineToPixels(-5, canvas.width),
                     yardLineToPixels(100, canvas.width),
                     canvas.height/2,
@@ -290,6 +291,9 @@ function ActionPane({game, player, dispatchAction}) {
     if (actions.includes('CALL_PLAY')) {
         return <CallPlayPane dispatchAction={dispatchAction} game={game} />;
     }
+    if (actions.includes('PAT_CHOICE')) {
+        return <PatPane dispatchAction={dispatchAction} game={game} />;
+    }
     if (actions.includes('POLL')) {
         const opponentAction = game.actions[getOpponent(player)];
         return <div>Waiting for opponent: {opponentAction}</div>
@@ -368,8 +372,6 @@ function RollPane({dispatchAction, game}) {
     );
 }
 
-
-
 function CallPlayPane({dispatchAction, game}) {
     
     function dispatchPlayAction(play) {
@@ -384,6 +386,17 @@ function CallPlayPane({dispatchAction, game}) {
             <ActionButton onClick={() => dispatchPlayAction('SHORT_RUN')}>SHORT RUN</ActionButton>
         </div>
     );
+}
+
+function PatPane({dispatchAction, game}) {
+    const dispatch = getChoiceActionDispatch(dispatchAction, 'PAT_CHOICE');
+
+    return (
+        <div>
+            <ActionButton onClick={() => dispatch('ONE_POINT')}>ONE_POINT</ActionButton>
+            <ActionButton onClick={() => dispatch('TWO_POINT')}>TWO_POINT</ActionButton>
+        </div>
+    )
 }
 
 function getChoiceActionDispatch(dispatchAction, choiceName) {
