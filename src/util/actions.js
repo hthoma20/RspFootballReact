@@ -8,6 +8,7 @@ export function getDieCountChoices(game) {
             return [2];
         case 'KICK_RETURN':
         case 'SACK_ROLL':
+        case 'KICK_RETURN_6':
             return [1];
     }
 }
