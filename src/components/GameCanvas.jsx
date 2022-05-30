@@ -13,7 +13,12 @@ export function GameCanvas({game, player}) {
 
     const [images, imagesLoaded] = useImages({
         field: 'field.png',
-        ball: 'football.png'
+        ball: 'football.png',
+        rock: 'rock.png',
+        paper: 'paper.png',
+        scissors: 'scissors.png',
+        fistLeft: 'fist_left.png',
+        fistRight: 'fist_right.png',
     });
 
     useEffect(() => {
@@ -25,18 +30,19 @@ export function GameCanvas({game, player}) {
         fix_dpi(canvas);
         
         if (animationStateRef.current === null) {
-            animationStateRef.current = getInitialAnimationState(canvas.width, canvas.height);
+            animationStateRef.current = getInitialAnimationState();
         }
 
         if (animationRef.current === null || animationStateRef.current.version != game.version) {
-            animationRef.current = getAnimation(animationStateRef.current, game, player);
+            animationStateRef.current.version = game.version;
+            animationRef.current = getAnimation(animationStateRef.current, game, player, canvas.width, canvas.height);
             window.cancelAnimationFrame(animationFrameRequestRef.current);
         }
 
         function animationExecutor() {
             const animationDone = animationRef.current.next().done;
             if (animationDone) {
-                console.log("Animation complete");
+                console.log(`Animation complete. Version ${animationStateRef.current.version}`);
                 return;
             }
             paintCanvas(canvas, images, animationStateRef.current, player);
@@ -72,10 +78,21 @@ function paintCanvas(canvas, images, animationState, player) {
     ctx.drawImage(images.field, 0, 0, canvas.width, canvas.height);
 
     // draw ball
+    const ballWidth = yardsToPixels(5, canvas.width);
+    const ballHeight = .67*ballWidth;
+
     ctx.drawImage(images.ball,
-        animationState.ballpos - animationState.ballWidth/2,
-        canvas.height/2 - animationState.ballHeight/2,
-        animationState.ballWidth, animationState.ballHeight);
+        animationState.ballpos - ballWidth/2,
+        canvas.height/2 - ballHeight/2,
+        ballWidth, ballHeight);
+
+    
+    // draw RSP
+    for (let rsp of animationState.rsp) {
+        const image = images[rsp.image];
+        const size = ballWidth*2;
+        ctx.drawImage(image, rsp.x - size/2, rsp.y - size/2, size, size);
+    }
 }
 
 /**
@@ -85,9 +102,63 @@ function paintCanvas(canvas, images, animationState, player) {
  * Note that nothing is yielded, the new frame is communicated by mutations to
  * the given animationState
  */
-function* getAnimation(animationState, game, player) {
+function* getAnimation(animationState, game, player, canvasWidth, canvasHeight) {
+
+    for (let frame of getRspAnimation(animationState, game, player, canvasWidth, canvasHeight)) {
+        yield;
+    }
+
+    for (let frame of getBallAnimation(animationState, game, player, canvasWidth)) {
+        yield;
+    }
+}
+
+function* getRspAnimation(animationState, game, player, canvasWidth, canvasHeight) {
+    // draw RSP
+    const rspResult = game.result.find(result => result.name == 'RSP');
+
+    if (!rspResult) {
+        animationState.rsp = [];
+        return;
+    }
+
+    function initRspObject(rspPlayer) {
+        const isLeft = player == rspPlayer;
+        const fieldPos = isLeft ? 40 : 60;
+        const image = isLeft ? 'fistLeft' : 'fistRight';
+
+        return {
+            image,
+            x: yardLineToPixels(fieldPos, canvasWidth),
+            y: canvasHeight/2
+        };
+    }
+
+    animationState.rsp = ['home', 'away'].map(initRspObject);
+    yield;
+
+    const bounceFrames = 20;
+    const pixelsPerFrame = (canvasHeight/3)/bounceFrames;
+    for (let bounce = 0; bounce < 3; bounce++) {
+        for (let frame = 0; frame < bounceFrames; frame++) {
+            const delta = frame < bounceFrames/2 ? pixelsPerFrame : -pixelsPerFrame;
+            for (let rsp of animationState.rsp) {
+                rsp.y += delta;
+            }
+            yield;
+        }
+    }
+
+    // indexes are defined by the initial mapping
+    const homeIndex = 0, awayIndex = 1;
+    animationState.rsp[homeIndex].image = rspResult.home.toLowerCase();
+    animationState.rsp[awayIndex].image = rspResult.away.toLowerCase();
+    yield;
+}
+
+function* getBallAnimation(animationState, game, player, canvasWidth) {
     const ballpos = game.possession == player ? game.ballpos : 100 - game.ballpos;
-    const pixelBallpos = yardLineToPixels(ballpos, animationState.canvasWidth);
+    const pixelBallpos = yardLineToPixels(ballpos, canvasWidth);
 
     if (!animationState.ballpos) {
         animationState.ballpos = pixelBallpos;
@@ -95,8 +166,7 @@ function* getAnimation(animationState, game, player) {
     }
     else {
         const distanceInPixels = pixelBallpos - animationState.ballpos;
-        console.log(distanceInPixels);
-        const ballAnimationFrames = getAnimationFrames(distanceInPixels);
+        const ballAnimationFrames = getBallAnimationFrames(distanceInPixels);
         const pixelsPerFrame = distanceInPixels / ballAnimationFrames;
         
         for (let x = 0; x < ballAnimationFrames; x++) {
@@ -108,7 +178,7 @@ function* getAnimation(animationState, game, player) {
     }
 }
 
-function getAnimationFrames(distanceInPixels) {
+function getBallAnimationFrames(distanceInPixels) {
     if (distanceInPixels < 50) {
         return 20;
     }
@@ -121,17 +191,10 @@ function getAnimationFrames(distanceInPixels) {
     return 80;
 }
 
-function getInitialAnimationState(width, height) {
-
-    const ballWidth = yardsToPixels(5, width);
-    const ballHeight = .67*ballWidth;
-
+function getInitialAnimationState() {
     return {
-        canvasWidth: width,
-        canvasHeight: height,
-        ballWidth: ballWidth,
-        ballHeight: ballHeight,
-        version: -1
+        version: -1,
+        rsp: []
     };
 }
 

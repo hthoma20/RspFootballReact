@@ -49,7 +49,6 @@ export function Game({user, gameId}) {
 
     async function dispatchAction(action) {
         console.log("Action dispatched: ", action);
-        console.log(game.gameId);
         const response = await postAction(game.gameId, user, action);
 
         if (response.status == 400) {
