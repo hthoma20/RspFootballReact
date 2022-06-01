@@ -93,6 +93,16 @@ function paintCanvas(canvas, images, animationState, player) {
     // draw field
     ctx.drawImage(images.field, 0, 0, canvas.width, canvas.height);
 
+    // draw first down
+    if (animationState.firstDown) {
+        ctx.beginPath();
+        ctx.moveTo(animationState.firstDown, 0);
+        ctx.lineTo(animationState.firstDown, canvas.height);
+        ctx.strokeStyle = '#efe410';
+        ctx.lineWidth = 5;
+        ctx.stroke();
+    }
+
     // draw ball
     const ballWidth = yardsToPixels(5, canvas.width);
     const ballHeight = .67*ballWidth;
@@ -165,6 +175,10 @@ function* getAnimation(animationState, game, player, canvasWidth, canvasHeight) 
     for (let frame of getBallAnimation(animationState, game, player, canvasWidth)) {
         yield;
     }
+
+    for (let frame of getFirstDownAnimation(animationState, game, player, canvasWidth)) {
+        yield;
+    }
 }
 
 function* getRspAnimation(animationState, game, player, canvasWidth, canvasHeight) {
@@ -208,41 +222,6 @@ function* getRspAnimation(animationState, game, player, canvasWidth, canvasHeigh
     animationState.rsp[homeIndex].image = rspResult.home.toLowerCase();
     animationState.rsp[awayIndex].image = rspResult.away.toLowerCase();
     yield;
-}
-
-function* getBallAnimation(animationState, game, player, canvasWidth) {
-    const ballpos = game.possession == player ? game.ballpos : 100 - game.ballpos;
-    const pixelBallpos = yardLineToPixels(ballpos, canvasWidth);
-
-    if (!animationState.ballpos) {
-        animationState.ballpos = pixelBallpos;
-        yield;
-    }
-    else {
-        const distanceInPixels = pixelBallpos - animationState.ballpos;
-        const ballAnimationFrames = getBallAnimationFrames(distanceInPixels);
-        const pixelsPerFrame = distanceInPixels / ballAnimationFrames;
-        
-        for (let x = 0; x < ballAnimationFrames; x++) {
-            animationState.ballpos += pixelsPerFrame;
-            yield;
-        }
-        animationState.ballpos = pixelBallpos;
-        yield;
-    }
-}
-
-function getBallAnimationFrames(distanceInPixels) {
-    if (distanceInPixels < 50) {
-        return 20;
-    }
-    if (distanceInPixels < 200) {
-        return 40;
-    }
-    if (distanceInPixels < 350) {
-        return 60;
-    }
-    return 80;
 }
 
 function* getDiceAnimation(animationState, game, player, canvasWidth, canvasHeight) {
@@ -311,6 +290,73 @@ function getRandomDieFace() {
 }
 
 
+function* getBallAnimation(animationState, game, player, canvasWidth) {
+    const pixelBallpos = yardLineToPixels(game.ballpos, canvasWidth, game, player);
+
+    if (!animationState.ballpos) {
+        animationState.ballpos = pixelBallpos;
+        yield;
+    }
+    else {
+        for (let ballpos of getTween(animationState.ballpos, pixelBallpos)) {
+            animationState.ballpos = ballpos;
+            yield;
+        }
+    }
+}
+
+function* getFirstDownAnimation(animationState, game, player, canvasWidth) {
+    if (!game.firstDown) {
+        animationState.firstDown = null;
+        yield;
+        return;
+    }
+
+    
+    const destination = yardLineToPixels(game.firstDown, canvasWidth, game, player);
+
+    if (!animationState.firstDown) {
+        animationState.firstDown = destination;
+        yield;
+        return;
+    }
+
+    for (let firstDown of getTween(animationState.firstDown, destination)) {
+        animationState.firstDown = firstDown;
+        yield;
+    }
+}
+
+function* getTween(start, finish) {
+    const distanceInPixels = finish - start;
+    const tweenFrames = getTweenFrames(distanceInPixels);
+    const pixelsPerFrame = distanceInPixels / tweenFrames;
+
+    let curr = start;
+    
+    for (let x = 0; x < tweenFrames; x++) {
+        curr += pixelsPerFrame;
+        yield curr;
+    }
+    yield finish;
+}
+
+function getTweenFrames(distanceInPixels) {
+    distanceInPixels = Math.abs(distanceInPixels);
+    if (distanceInPixels < 50) {
+        return 20;
+    }
+    if (distanceInPixels < 200) {
+        return 40;
+    }
+    if (distanceInPixels < 350) {
+        return 60;
+    }
+    return 80;
+}
+
+
+
 // given a list of animations, advance each a frame before yielding
 function* getParallelAnimation(animations) {
     let hasIncompleteAnimation = true;
@@ -336,7 +382,14 @@ function getResult(game, resultName) {
 
 // return the number of pixels from the left of the canvas
 // which corresponds with the given yardLine
-function yardLineToPixels(yardLine, canvasWidth) {
+// if the optional game and player arguments are included, take into account the given
+// players point of veiw in the context of the game
+function yardLineToPixels(yardLine, canvasWidth, game, player) {
+
+    if (game && player) {
+        yardLine = game.possession == player ? yardLine : 100-yardLine;
+    }
+
     const pixelsPerYard = canvasWidth/120;
     return pixelsPerYard * (10+yardLine);
 }
@@ -367,17 +420,6 @@ function Field({game, player, setIsAnimating}) {
 
         const ctx = canvas.getContext('2d');
 
-        // draw first down
-        if (game.firstDown) {
-            const firstDownPos = game.possession == player ? game.firstDown : 100 - game.firstDown;
-            const firstDownPixelPos = yardLineToPixels(firstDownPos, canvas.width);
-            ctx.beginPath();
-            ctx.moveTo(firstDownPixelPos, 0);
-            ctx.lineTo(firstDownPixelPos, canvas.height);
-            ctx.strokeStyle = '#efe410';
-            ctx.lineWidth = 5;
-            ctx.stroke();
-        }
 
         // display current play
         ctx.font = "30px Arial";
