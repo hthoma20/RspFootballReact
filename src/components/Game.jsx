@@ -9,7 +9,7 @@ import * as Robot from 'bot/Robot';
 
 import 'styles/Game.css';
 
-const POLL_ON = false;
+const POLL_ON = true;
 const ROBOT_ON = true;
 
 function getPlayer(game, user) {

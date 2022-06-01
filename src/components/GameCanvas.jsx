@@ -32,6 +32,7 @@ export function GameCanvas({game, player}) {
         scissors: 'scissors.png',
         fistLeft: 'fist_left.png',
         fistRight: 'fist_right.png',
+        dice: 'dice.png'
     });
 
     useEffect(() => {
@@ -86,7 +87,7 @@ function fix_dpi(canvas) {
 }
 
 function paintCanvas(canvas, images, animationState, player) {
-    // console.log(animationState);
+    // console.log("animationState:", animationState);
     const ctx = canvas.getContext('2d');
 
     // draw field
@@ -100,7 +101,6 @@ function paintCanvas(canvas, images, animationState, player) {
         animationState.ballpos - ballWidth/2,
         canvas.height/2 - ballHeight/2,
         ballWidth, ballHeight);
-
     
     // draw RSP
     for (let rsp of animationState.rsp) {
@@ -108,12 +108,41 @@ function paintCanvas(canvas, images, animationState, player) {
         const size = ballWidth*2;
         ctx.drawImage(image, rsp.x - size/2, rsp.y - size/2, size, size);
     }
+
+    // draw roll
+    for (let die of animationState.roll) {
+        const sideLength = yardsToPixels(5, canvas.width);
+        drawDie(ctx, images.dice, sideLength, die);    
+    }
+}
+
+function drawDie(ctx, image, sideLength, die) {
+    // the source image is a grid with dimension 640*427 pixels, with each die image
+    // arranged as below
+    // 1 2 3
+    // 4 5 6
+    const clipWidth = 213;
+    const clipHeight = 213;
+
+    const clipX = ((die.face-1) % 3) * clipWidth;
+    const clipY =  die.face < 4 ? 0 : clipHeight;
+
+    ctx.drawImage(image,
+        clipX,
+        clipY,
+        clipWidth,
+        clipHeight,
+        die.x,
+        die.y,
+        sideLength,
+        sideLength);
 }
 
 function getInitialAnimationState() {
     return {
         version: -1,
-        rsp: []
+        rsp: [],
+        roll: []
     };
 }
 
@@ -125,8 +154,11 @@ function getInitialAnimationState() {
  * the given animationState
  */
 function* getAnimation(animationState, game, player, canvasWidth, canvasHeight) {
-
     for (let frame of getRspAnimation(animationState, game, player, canvasWidth, canvasHeight)) {
+        yield;
+    }
+
+    for (let frame of getDiceAnimation(animationState, game, player, canvasWidth, canvasHeight)) {
         yield;
     }
 
@@ -137,7 +169,7 @@ function* getAnimation(animationState, game, player, canvasWidth, canvasHeight) 
 
 function* getRspAnimation(animationState, game, player, canvasWidth, canvasHeight) {
     // draw RSP
-    const rspResult = game.result.find(result => result.name == 'RSP');
+    const rspResult = getResult(game, 'RSP');
 
     if (!rspResult) {
         animationState.rsp = [];
@@ -213,9 +245,94 @@ function getBallAnimationFrames(distanceInPixels) {
     return 80;
 }
 
+function* getDiceAnimation(animationState, game, player, canvasWidth, canvasHeight) {
+
+    const result = getResult(game, 'ROLL');
+
+    if (!result) {
+        animationState.roll = [];
+        yield;
+        return;
+    }
+
+    const initX = 0, initY = 0, initDx = canvasWidth/100, initDy = 0;
+    const offset = yardsToPixels(6, canvasWidth);
+
+    animationState.roll = result.roll.map((die, index) => {
+        return {
+            face: getRandomDieFace(),
+            x: initX + offset*index,
+            y: initY,
+            dx: initDx,
+            dy: initDy
+        };
+    });
+
+    const floorY = (3/4) * canvasHeight, acceleration = 0.4, damping = 0.5, threshold = 0.5;
+    const animations = animationState.roll.map(die => getDieAnimation(die, floorY, acceleration, damping, threshold));
+    for (let frame of getParallelAnimation(animations)) {
+        yield;
+    }
+
+    result.roll.forEach((die, index) => animationState.roll[index].face = die);
+    yield;
+}
+
+// note that threshold must be less than acceleration
+function* getDieAnimation(die, floorY, acceleration, damping, threshold) {
+    // if the threshold is greater than the acceleration, it is possible to accelerate "over the threshold" and
+    // bounce forever
+    threshold = Math.min(acceleration, threshold);
+
+    while (true) {
+        // if its a bounce
+        if (die.y > floorY && die.dy > 0) {
+            die.dy = -(die.dy * damping);
+            die.dx = die.dx * damping;
+
+            die.face = getRandomDieFace();
+
+            if (Math.abs(die.dy) < threshold) {
+                yield;
+                return;
+            }
+        }
+
+        die.x += die.dx;
+        die.y += die.dy;
+
+        die.dy += acceleration;
+        yield;
+    }
+}
+
+function getRandomDieFace() {
+    return Math.floor(Math.random()*6) + 1;
+}
 
 
+// given a list of animations, advance each a frame before yielding
+function* getParallelAnimation(animations) {
+    let hasIncompleteAnimation = true;
 
+    while (hasIncompleteAnimation) {
+        hasIncompleteAnimation = false;
+        for (let animation of animations) {
+            const done = animation.next().done;
+            if (!done) {
+                hasIncompleteAnimation = true;
+            }
+        }
+        yield;
+    }
+}
+
+
+// return a result of the given name
+// undefined if not present
+function getResult(game, resultName) {
+    return game.result.find(result => result.name == resultName);
+}
 
 // return the number of pixels from the left of the canvas
 // which corresponds with the given yardLine
@@ -262,19 +379,6 @@ function Field({game, player, setIsAnimating}) {
             ctx.stroke();
         }
 
-        // draw dice
-        const rollResult = game.result.find(result => result.name == 'ROLL');
-        if (rollResult) {
-            const dieX = 20;
-            const dieY = 20;
-            const width = ballWidth + 10;
-            for (let i = 0; i < rollResult.roll.length; i++) {
-                const x = dieX + i*width;
-                drawDie(ctx, diceImage, rollResult.roll[i], x, dieY, ballWidth);
-            }
-        }
-
-
         // display current play
         ctx.font = "30px Arial";
         ctx.fillStyle = '#000';
@@ -288,26 +392,6 @@ function Field({game, player, setIsAnimating}) {
     );
 }
 
-function drawDie(ctx, image, value, x, y, dimension) {
-    // the source image is a grid with dimension 640*427 pixels, with each die image
-    // arranged as below
-    // 1 2 3
-    // 4 5 6
-    const clipWidth = 213;
-    const clipHeight = 213;
 
-    const clipX = ((value-1) % 3) * clipWidth;
-    const clipY =  value < 4 ? 0 : clipHeight;
-
-    ctx.drawImage(image,
-        clipX,
-        clipY,
-        clipWidth,
-        clipHeight,
-        x,
-        y,
-        dimension,
-        dimension);
-}
 
 
