@@ -103,6 +103,21 @@ function paintCanvas(canvas, images, animationState, player) {
         ctx.stroke();
     }
 
+    // draw text
+    for (let text of Object.values(animationState.text)) {
+        text = {
+            size: canvas.height/3,
+            x: canvas.width/2,
+            y: canvas.height/2,
+            ...text
+        };
+
+        ctx.font = `${text.size}px Arial`;
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'center';
+        ctx.fillText(text.text, text.x, text.y);
+    }
+
     // draw ball
     const ballWidth = yardsToPixels(5, canvas.width);
     const ballHeight = .67*ballWidth;
@@ -152,7 +167,8 @@ function getInitialAnimationState() {
     return {
         version: -1,
         rsp: [],
-        roll: []
+        roll: [],
+        text: [],
     };
 }
 
@@ -164,6 +180,10 @@ function getInitialAnimationState() {
  * the given animationState
  */
 function* getAnimation(animationState, game, player, canvasWidth, canvasHeight) {
+
+    getCurrentPlayFrame(animationState, game, player, canvasWidth, canvasHeight);
+    yield;
+
     for (let frame of getRspAnimation(animationState, game, player, canvasWidth, canvasHeight)) {
         yield;
     }
@@ -179,6 +199,43 @@ function* getAnimation(animationState, game, player, canvasWidth, canvasHeight) 
     for (let frame of getFirstDownAnimation(animationState, game, player, canvasWidth)) {
         yield;
     }
+
+    getGameOverFrame(animationState, game, player, canvasWidth, canvasHeight);
+    yield;
+}
+
+function getGameOverFrame(animationState, game, player, canvasWidth, canvasHeight) {
+    if (game.state == 'GAME_OVER') {
+        animationState.text.gameOver = {
+            x: canvasWidth/2,
+            y: canvasHeight/2,
+            size: canvasHeight/3,
+            text: "Game Over"
+        };
+    }
+    else {
+        delete animationState.text.gameOver;
+    }
+}
+
+function getCurrentPlayFrame(animationState, game, player, canvasWidth, canvasHeight) {
+
+    if (!game.play) {
+        delete animationState.text.currentPlay;
+        return;
+    }
+
+    function upperFirstLetter(word) {
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    }
+
+    const text = game.play.split('_').map(upperFirstLetter).join(' ');
+    animationState.text.currentPlay = {
+        text: text,
+        x: canvasWidth/2,
+        y: canvasHeight/4,
+        size: canvasHeight/4
+    };
 }
 
 function* getRspAnimation(animationState, game, player, canvasWidth, canvasHeight) {
@@ -296,12 +353,29 @@ function* getBallAnimation(animationState, game, player, canvasWidth) {
     if (!animationState.ballpos) {
         animationState.ballpos = pixelBallpos;
         yield;
+        return;
     }
-    else {
-        for (let ballpos of getTween(animationState.ballpos, pixelBallpos)) {
+    
+    const isSafety = !!getResult(game, 'SAFETY');
+    console.log(isSafety);
+    if (isSafety) {
+        const safetyBallPos = yardLineToPixels(-5, canvasWidth, game, player);
+        for (let ballpos of getTween(animationState.ballpos, safetyBallPos)) {
             animationState.ballpos = ballpos;
             yield;
         }
+        const pause = 100;
+        animationState.text.safety = {text: "Safety!"};
+        for (let frame = 0; frame < pause; frame++) {
+            yield;
+        }
+        delete animationState.text.safety;
+        yield;
+    }
+
+    for (let ballpos of getTween(animationState.ballpos, pixelBallpos)) {
+        animationState.ballpos = ballpos;
+        yield;
     }
 }
 
