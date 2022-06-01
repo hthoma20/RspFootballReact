@@ -4,6 +4,19 @@ import { useImage, useImages } from "util/images";
 
 import 'styles/Game.css';
 
+/**
+ * The GameCanvas is responsible for displaying the current state of the game
+ * to the user. This includes an image of the ball, the dice, etc.
+ * The GameCanvas also orchestrates animations.
+ * 
+ * On the first render an inital animationState is created.
+ * This state is saved across renders, but it is not tied to React state so changes
+ * do not cause re-renders.
+ * 
+ * Everytime a render with an updated game occurs, a new animation is created via getAnimation.
+ * The animation is a generator which mutates the animationState and `yield`s when the frame should be displayed.
+ * paintCanvas reads the animation state to update the display. 
+ */
 export function GameCanvas({game, player}) {
     const canvasRef = useRef(null);
 
@@ -33,6 +46,8 @@ export function GameCanvas({game, player}) {
             animationStateRef.current = getInitialAnimationState();
         }
 
+        // if this is the first render with a new version of the game,
+        // cancel the animation for the outdated version
         if (animationRef.current === null || animationStateRef.current.version != game.version) {
             animationStateRef.current.version = game.version;
             animationRef.current = getAnimation(animationStateRef.current, game, player, canvas.width, canvas.height);
@@ -93,6 +108,13 @@ function paintCanvas(canvas, images, animationState, player) {
         const size = ballWidth*2;
         ctx.drawImage(image, rsp.x - size/2, rsp.y - size/2, size, size);
     }
+}
+
+function getInitialAnimationState() {
+    return {
+        version: -1,
+        rsp: []
+    };
 }
 
 /**
@@ -191,12 +213,9 @@ function getBallAnimationFrames(distanceInPixels) {
     return 80;
 }
 
-function getInitialAnimationState() {
-    return {
-        version: -1,
-        rsp: []
-    };
-}
+
+
+
 
 // return the number of pixels from the left of the canvas
 // which corresponds with the given yardLine
@@ -229,32 +248,7 @@ function Field({game, player, setIsAnimating}) {
 
         const canvas = canvasRef.current;
 
-        // scale the canvas appropriately for the pixel ratio
-        // see https://medium.com/wdstack/fixing-html5-2d-canvas-blur-8ebe27db07da
-        (function fix_dpi() {
-            const dpi = window.devicePixelRatio;
-            const style = getComputedStyle(canvas);
-            const style_width = Number(style.width.match(/(.*)px/)[1]);
-            const style_height = Number(style.height.match(/(.*)px/)[1]);
-            
-            canvas.width = style_width * dpi;
-            canvas.height = style_height * dpi;
-        })();
-
         const ctx = canvas.getContext('2d');
-        
-        // draw field
-        ctx.drawImage(fieldImage, 0, 0, canvas.width, canvas.height);
-
-        // draw ball
-        const ballpos = game.possession == player ? game.ballpos : 100 - game.ballpos;
-        const ballPixelPos = yardLineToPixels(ballpos, canvas.width);
-        const ballWidth = yardsToPixels(5, canvas.width);
-        const ballHeight = .67*ballWidth;
-        ctx.drawImage(ballImage,
-            ballPixelPos - ballWidth/2,
-            canvas.height/2 - ballHeight/2,
-            ballWidth, ballHeight);
 
         // draw first down
         if (game.firstDown) {
@@ -280,17 +274,6 @@ function Field({game, player, setIsAnimating}) {
             }
         }
 
-        // draw RSP
-        const rspResult = game.result.find(result => result.name == 'RSP');
-        if (rspResult) {
-            drawRsp(ctx,
-                    {rock: rockImage, scissors: scissorsImage, paper: paperImage},
-                    rspResult,
-                    yardLineToPixels(-5, canvas.width),
-                    yardLineToPixels(100, canvas.width),
-                    canvas.height/2,
-                    ballWidth*2);
-        }
 
         // display current play
         ctx.font = "30px Arial";
@@ -325,19 +308,6 @@ function drawDie(ctx, image, value, x, y, dimension) {
         y,
         dimension,
         dimension);
-}
-
-function drawRsp(ctx, images, result, homeX, awayX, y, width) {
-    function getImage(choice) {
-        switch (choice) {
-            case 'ROCK': return images.rock;
-            case 'SCISSORS': return images.scissors;
-            case 'PAPER': return images.paper;
-        }
-    }
-
-    ctx.drawImage(getImage(result.home), homeX, y, width, width);
-    ctx.drawImage(getImage(result.away), awayX, y, width, width);
 }
 
 
