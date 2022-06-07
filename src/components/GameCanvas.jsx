@@ -220,6 +220,16 @@ function getGameOverFrame(animationState, game, player, canvasWidth, canvasHeigh
 
 function getCurrentPlayFrame(animationState, game, player, canvasWidth, canvasHeight) {
 
+    if (game.state == 'FUMBLE') {
+        animationState.text.currentPlay = {
+            text: "Fumble!",
+            x: canvasWidth/2,
+            y: canvasHeight/4,
+            size: canvasHeight/4
+        };
+        return;
+    }
+
     if (!game.play) {
         delete animationState.text.currentPlay;
         return;

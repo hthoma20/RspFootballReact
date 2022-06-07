@@ -242,7 +242,8 @@ function CallPlayPane({dispatchAction, game}) {
     
     return (
         <div>
-            <ActionButton onClick={() => dispatchPlayAction('SHORT_RUN')}>SHORT RUN</ActionButton>
+            <ActionButton onClick={() => dispatchPlayAction('SHORT_RUN')}>Short Run</ActionButton>
+            <ActionButton onClick={() => dispatchPlayAction('LONG_RUN')}>Long Run</ActionButton>
         </div>
     );
 }
@@ -252,8 +253,8 @@ function PatPane({dispatchAction, game}) {
 
     return (
         <div>
-            <ActionButton onClick={() => dispatch('ONE_POINT')}>ONE_POINT</ActionButton>
-            <ActionButton onClick={() => dispatch('TWO_POINT')}>TWO_POINT</ActionButton>
+            <ActionButton onClick={() => dispatch('ONE_POINT')}>One Point</ActionButton>
+            <ActionButton onClick={() => dispatch('TWO_POINT')}>Two Point</ActionButton>
         </div>
     )
 }

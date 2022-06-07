@@ -15,7 +15,7 @@ export function takeAction(game, player, dispatchAction) {
     if (action) {
         setTimeout(() => {
             dispatchAction(action);
-        }, 500);
+        }, 1000);
     }
 }
 
