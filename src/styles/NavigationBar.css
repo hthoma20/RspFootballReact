@@ -1,0 +1,12 @@
+
+.navigationBar {
+}
+
+.userName {
+    display: table;
+}
+
+.gameIdLabel {
+    display: table;
+    margin: auto;
+}

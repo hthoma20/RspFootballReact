@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocalStorage } from 'util/localStorage';
 
 import { Game } from './Game';
 import { GamePicker } from './GamePicker';
@@ -8,31 +9,21 @@ import { NavigationBar } from './NavigationBar';
 
 function App() {
 
-    const [user, setUser] = useState(null);
-    const [gameId, setGameId] = useState("I <3 Daylin"); // useState('test_default_id');
+    const [user, setUser, clearUser] = useLocalStorage('user');
+    const [gameId, setGameId, clearGameId] = useLocalStorage('gameId');
 
-    useEffect(() => {
-        const savedUser = window.localStorage.getItem('user');
-        if (savedUser) {
-            setUser(savedUser);
-        }
-    });
-
-    function clearUser() {
-        window.localStorage.removeItem('user');
-        setUser(null);
-    }
-
-    function updateUser(user) {
-        window.localStorage.setItem('user', user);
-        setUser(user);
+    function logout() {
+        clearGameId();
+        clearUser();
     }
 
     return <div>
-        <NavigationBar user={user} clearUser={clearUser} />
+        <NavigationBar
+            user={user} logout={logout}
+            gameId={gameId} exitGame={clearGameId} />
         <MainContent
             user={user}
-            setUser={updateUser}
+            setUser={setUser}
             gameId={gameId}
             setGameId={setGameId} />
     </div>;
