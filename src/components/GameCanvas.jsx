@@ -18,11 +18,12 @@ import 'styles/Game.css';
  * paintCanvas reads the animation state to update the display. 
  */
 export function GameCanvas({game, player}) {
+
     const canvasRef = useRef(null);
 
-    const animationStateRef = useRef(null);
-    const animationRef = useRef(null);
-    const animationFrameRequestRef = useRef(null);
+    const animationStateRef = useRef(getInitialAnimationState());
+    const animationRef = useRef(function*(){}());
+    const animationFrameRequestRef = useRef(null);  
 
     const [images, imagesLoaded] = useImages({
         field: 'field.png',
@@ -40,20 +41,20 @@ export function GameCanvas({game, player}) {
             return;
         }
 
-        const canvas = canvasRef.current;
-        fix_dpi(canvas);
-        
-        if (animationStateRef.current === null) {
-            animationStateRef.current = getInitialAnimationState();
+        // This is the case of a poll returning a known version
+        // in this case, we are already in progress with the relevant animation
+        // or it has completed
+        if (animationStateRef.current.version == game.version) {
+            return;
         }
 
-        // if this is the first render with a new version of the game,
-        // cancel the animation for the outdated version
-        if (animationRef.current === null || animationStateRef.current.version != game.version) {
-            animationStateRef.current.version = game.version;
-            animationRef.current = getAnimation(animationStateRef.current, game, player, canvas.width, canvas.height);
-            window.cancelAnimationFrame(animationFrameRequestRef.current);
-        }
+        const canvas = canvasRef.current;
+        fix_dpi(canvas);
+
+        console.log(`Starting animation. Version ${game.version}`);
+        animationStateRef.current.version = game.version;
+        animationRef.current = getAnimation(animationStateRef.current, game, player, canvas.width, canvas.height);
+        window.cancelAnimationFrame(animationFrameRequestRef.current);
 
         function animationExecutor() {
             const animationDone = animationRef.current.next().done;

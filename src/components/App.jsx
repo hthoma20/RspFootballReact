@@ -9,7 +9,7 @@ import { NavigationBar } from './NavigationBar';
 function App() {
 
     const [user, setUser] = useState(null);
-    const [gameId, setGameId] = useState('test_default_id');
+    const [gameId, setGameId] = useState("I <3 Daylin"); // useState('test_default_id');
 
     useEffect(() => {
         const savedUser = window.localStorage.getItem('user');

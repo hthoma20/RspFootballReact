@@ -11,7 +11,7 @@ function getImage(path) {
 function imageOnloadPromise(image) {
     return new Promise(resolve => {
         image.onload = () => {
-            console.log("resolving load for ", image);
+            console.log("Image loaded: ", image);
             resolve();
         };
     });

@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { postAction } from "api/actions";
 import { getGame, pollGame } from "api/games";
-import { useImage, getScoreImagePath } from "util/images";
+import { getScoreImagePath } from "util/images";
 import { getDieCountChoices } from "util/actions";
 import { GameCanvas } from "./GameCanvas";
 import * as Robot from 'bot/Robot';
@@ -10,7 +10,7 @@ import * as Robot from 'bot/Robot';
 import 'styles/Game.css';
 
 const POLL_ON = true;
-const ROBOT_ON = true;
+const ROBOT_ON = false;
 
 function getPlayer(game, user) {
     return game.players.home == user ? 'home' : 'away';
@@ -200,7 +200,7 @@ function TouchbackChoicePane({dispatchAction}) {
     return (
         <div>
             <ActionButton onClick={() => dispatch('TOUCHBACK')}>TOUCHBACK</ActionButton>
-            <ActionButton onClick={() => dispatch('ROLL')}>ROLL</ActionButton>
+            <ActionButton onClick={() => dispatch('RETURN')}>ROLL</ActionButton>
         </div>
     );
 }
