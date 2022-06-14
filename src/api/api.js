@@ -7,11 +7,12 @@ function getEndpoint(route) {
     return `${API_URL}/${route}`;
 }
 
-export async function getRequest(route) {
-    const response = await fetch(getEndpoint(route));
+export async function getRequest(route, queryParams) {
+    const response = await fetch(getEndpoint(route) + '?' + new URLSearchParams(queryParams));
+    const data = await response.json();
     return {
         status: response.status,
-        data: response.json()
+        data: data
     };
 }
 

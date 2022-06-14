@@ -1,0 +1,61 @@
+
+.gamePicker {
+    /* border: 1px solid green; */
+    width: 40%;
+    margin: auto;
+}
+
+.gameListContainer {
+    margin-top: 15px;
+}
+
+.gameList {
+    /* border: 1px solid blue; */
+}
+
+.gameListHeader {
+    font-weight: bold;
+}
+
+.gameListItem {
+    /* border: 1px solid red; */
+    display: flex;
+}
+
+.gameListHeader {
+    display: flex;
+}
+
+.gameListItem:hover {
+    background-color: lightgrey;
+}
+
+.gameId {
+    width: 34%;
+}
+
+.home {
+    width: 33%;
+}
+
+.away {
+    width: 33%;
+}
+
+.newGameForm {
+    width: 40%;
+    margin: auto;
+}
+
+.clickableText {
+    border: 1px solid grey;
+    border-radius: 3px;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-left: 2pt;
+}
+
+.clickableText:hover {
+    background-color: darkgrey;
+    border-color: grey;
+}

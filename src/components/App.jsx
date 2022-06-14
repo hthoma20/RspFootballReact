@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { useLocalStorage } from 'util/localStorage';
 
 import { Game } from './Game';

@@ -1,8 +1,9 @@
 import { getRequest, postRequest } from './api';
 
 
-export async function getGames() {
-    return (await getRequest('/games')).data;
+export async function getGames(user) {
+    const result = await getRequest('/games', {user: user});
+    return result.data.games;
 }
 
 export async function getGame(gameId) {
@@ -19,3 +20,7 @@ export async function pollGame(gameId, version) {
     return (await postRequest('/poll', {gameId, version})).data;
 }
 
+
+export async function newGame(gameId, user) {
+    return await postRequest('/new', {gameId, user});
+}
