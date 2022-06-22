@@ -6,7 +6,7 @@
     display: grid;
     grid-template: 
     "a s" 50%
-    "f f" 50%
+    "r f" 50%
     / 1fr 1fr;
 
     margin: auto;
@@ -16,6 +16,13 @@
     border-width: 10px;
     border-color: black;
     border-radius: 10px;
+}
+
+#resultLog {
+    grid-area: r;
+    width: 20%;
+    height: 100%;
+    margin: auto;
 }
 
 #field {

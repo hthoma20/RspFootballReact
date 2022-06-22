@@ -5,12 +5,13 @@ import { getGame, pollGame } from "api/games";
 import { getScoreImagePath } from "util/images";
 import { getDieCountChoices } from "util/actions";
 import { GameCanvas } from "./GameCanvas";
+import { ResultLog } from "./ResultLog";
 import * as Robot from 'bot/Robot';
 
 import 'styles/Game.css';
 
 const POLL_ON = true;
-const ROBOT_ON = false;
+const ROBOT_ON = true;
 
 function getPlayer(game, user) {
     return game.players.home == user ? 'home' : 'away';
@@ -66,6 +67,7 @@ export function Game({user, gameId}) {
 
     return (
         <div className="game" >
+            <ResultLog game={game} />
             <GameCanvas game={game} player={player} />
             <div id="actionPane" >
                 <ActionPane game={game} player={player} dispatchAction={dispatchAction} />
