@@ -3,11 +3,8 @@
     width: 70vw;
     height: 70vh;
 
-    display: grid;
-    grid-template: 
-    "a s" 50%
-    "r f" 50%
-    / 1fr 1fr;
+    display: flex;
+    flex-direction: column;
 
     margin: auto;
     margin-top: 10vh;
@@ -18,110 +15,104 @@
     border-radius: 10px;
 }
 
-#resultLog {
-    grid-area: r;
-    width: 20%;
-    height: 100%;
+#actionPane {
+    height: 10%;
     margin: auto;
 }
 
+#middlePane {
+    height: 60%;
+    
+    display: flex;
+}
+
+#scoreBoard {
+    height: 30%;
+    
+    background-color: black;
+
+    display: flex;
+}
+
+#scoreBoard > * {
+    margin: auto;
+}
+
+#resultLog {
+    width: 20%;
+    height: 70%;
+    margin: auto;
+    padding-left: 10px;
+
+    border-style: groove;
+    border-width: 6px;
+    /* border-color: yellow; */
+    background-color: beige;
+}
+
 #field {
-    grid-area: f;
     width: 70%;
     height: 100%;
     margin: auto;
 }
 
-#actionPane {
-    grid-area: a;
-    margin: auto;
+#homeScoreContainer {
+    flex-basis: 12%;
+    margin-right: 0;
+    margin-left: 1%;
+}
+
+#homePenContainer {
+    flex-basis: 2%;
+    margin-left: 1%;
+}
+
+#quarterContainer {
+    flex-basis: 5%;
+}
+
+#timeContainer {
+    flex-basis: 15%;
+}
+
+#downContainer {
+    flex-basis: 5%;
+}
+
+#awayPenContainer {
+    flex-basis: 2%;
+    margin-right: 1%;
+}
+
+#awayScoreContainer {
+    flex-basis: 12%;
+    margin-left: 0;
+    margin-right: 1%;
 }
 
 
 .scoreLabel {
     color: white;
     margin: auto;
+    text-align: center;
 }
 
 .digitDisplay {
     display: flex;
-    height: 100%;
-    /* max-width: 100%; */
-    margin: auto;
     justify-content: center;
+    max-height: 100%;
+    max-width: 100%;
 }
 
 .actionButton {
     margin: 5px;
 }
 
-img {
-    max-height: 100%;
+.digitDisplay img {
+    max-width: 100%;
 }
 
-#scoreBoard {
-    /* The area of the main grid */
-    grid-area: s; 
-
-    height: 100%;
-    
-    background-color: black;
-    
-    display: grid;
-    grid-template:
-    "hd hd ad ad" 40%
-    "hl hl al al" 10%
-    "hpl hpd apl apd" 10%
-    "qd td td dd" 30%
-    "ql tl tl dl" 10%
-    / 1fr 1fr 1fr 1fr;
+.doubleDigitDisplay img {
+    max-width: 50%;
 }
 
-#homeLabel {
-    grid-area: hl;
-    font-size: 2em;
-}
-#homeScore {
-    grid-area: hd;
-}
-#homePenaltiesLabel {
-    grid-area: hpl;
-    margin-right: 5px;
-}
-#homePenalties {
-    grid-area: hpd;
-    margin-left: 5px;
-}
-#awayLabel {
-    grid-area: al;
-    font-size: 2em;
-}
-#awayScore {
-    grid-area: ad;
-}
-#awayPenaltiesLabel {
-    grid-area: apl;
-    margin-right: 5px;
-}
-#awayPenalties {
-    grid-area: apd;
-    margin-left: 5px;
-}
-#quarterLabel {
-    grid-area: ql;
-}
-#quarter {
-    grid-area: qd;
-}
-#timerLabel {
-    grid-area: tl;
-}
-#timer {
-    grid-area: td;
-}
-#downLabel {
-    grid-area: dl;
-}
-#down {
-    grid-area: dd;
-}

@@ -10,7 +10,7 @@ import * as Robot from 'bot/Robot';
 
 import 'styles/Game.css';
 
-const POLL_ON = true;
+const POLL_ON = false;
 const ROBOT_ON = true;
 
 function getPlayer(game, user) {
@@ -67,11 +67,13 @@ export function Game({user, gameId}) {
 
     return (
         <div className="game" >
-            <ResultLog game={game} />
-            <GameCanvas game={game} player={player} />
             <div id="actionPane" >
                 <ActionPane game={game} player={player} dispatchAction={dispatchAction} />
             </div>
+            <div id="middlePane">
+                <ResultLog game={game} />
+                <GameCanvas game={game} player={player} />
+            </div> 
             <ScoreBoard game={game} />
         </div>
     );
@@ -84,25 +86,40 @@ function ScoreBoard({game}) {
 
     return (
         <div id="scoreBoard" >
-            <ScoreLabel id="homeLabel" label="HOME" />
-            <DoubleDigitDisplay id="homeScore" num={game.score.home} />
-            <ScoreLabel id="homePenaltiesLabel" label="PEN" />
-            <DigitDisplay id="homePenalties" digit={game.penalties.home} />
-
-            <ScoreLabel id="awayLabel" label="AWAY" />
-            <DoubleDigitDisplay id="awayScore" num={game.score.away} />
-            <ScoreLabel id="awayPenaltiesLabel" label="PEN" />
-            <DigitDisplay id="awayPenalties" digit={game.penalties.away} />
-
-            <ScoreLabel id="quarterLabel" label="QTR" />
-            <DigitDisplay id="quarter" digit={quarter} />
-
-            <ScoreLabel id="timerLabel" label="TIME" />
-            <DoubleDigitDisplay id="timer" num={game.playCount} />
-
-            <ScoreLabel id="downLabel" label="DOWN" />
-            <DigitDisplay id="down" digit={game.down} />
+            <div id="homeScoreContainer">
+                <DoubleDigitDisplay id="homeScore" num={game.score.home} />
+                <ScoreLabel id="homeLabel" label="HOME" />
+            </div>
             
+            <div id="homePenContainer">
+                <DigitDisplay id="homePenalties" digit={game.penalties.home} />
+                <ScoreLabel id="homePenaltiesLabel" label="PEN" />
+            </div>
+            
+            <div id="quarterContainer">
+                <DigitDisplay id="quarter" digit={quarter} />
+                <ScoreLabel id="quarterLabel" label="QTR" />
+            </div>
+
+            <div id="timeContainer">
+                <DoubleDigitDisplay id="timer" num={game.playCount} />
+                <ScoreLabel id="timerLabel" label="TIME" />
+            </div>
+
+            <div id="downContainer">
+                <DigitDisplay id="down" digit={game.down} />
+                <ScoreLabel id="downLabel" label="DOWN" />
+            </div>
+
+            <div id="awayPenContainer" >
+                <DigitDisplay id="awayPenalties" digit={game.penalties.away} />
+                <ScoreLabel id="awayPenaltiesLabel" label="PEN" />
+            </div>
+
+            <div id="awayScoreContainer">
+                <DoubleDigitDisplay id="awayScore" num={game.score.away} />
+                <ScoreLabel id="awayLabel" label="AWAY" />
+            </div>
         </div>
     );
 }
@@ -120,7 +137,7 @@ function DoubleDigitDisplay({num, id}) {
     const tens = Math.floor(num/10);
 
     return (
-        <div id={id} className="digitDisplay" alt={num} >
+        <div id={id} className="digitDisplay doubleDigitDisplay" alt={num} >
             <img src={getScoreImagePath(tens)} id={id} />
             <img src={getScoreImagePath(ones)} id={id} />
         </div>
