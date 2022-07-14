@@ -11,7 +11,7 @@ import * as Robot from 'bot/Robot';
 import 'styles/Game.css';
 
 const POLL_ON = false;
-const ROBOT_ON = true;
+const ROBOT_ON = false;
 
 function getPlayer(game, user) {
     return game.players.home == user ? 'home' : 'away';
@@ -67,14 +67,15 @@ export function Game({user, gameId}) {
 
     return (
         <div className="game" >
+            <ScoreBoard game={game} />
+            
+            <div id="middlePane">
+                <GameCanvas game={game} player={player} />
+                <ResultLog game={game} />
+            </div> 
             <div id="actionPane" >
                 <ActionPane game={game} player={player} dispatchAction={dispatchAction} />
             </div>
-            <div id="middlePane">
-                <ResultLog game={game} />
-                <GameCanvas game={game} player={player} />
-            </div> 
-            <ScoreBoard game={game} />
         </div>
     );
 }

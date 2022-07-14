@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect } from "react";
+import { useRef, useState } from "react";
 
 import { getRspWinner } from 'util/rsp';
 
@@ -13,15 +14,26 @@ export function ResultLog({game}) {
     // the most recently rendered game version
     const [version, setVersion] = useState(-1);
     const [resultLog, setResultLog] = useState([]);
+
+    const resultLogRef = useRef(null);
+    const [shouldScroll, setShouldScroll] = useState(false);
+
+    useEffect(() => {
+        if (shouldScroll) {
+            resultLogRef.current.scrollTop = resultLogRef.current.scrollHeight;
+            setShouldScroll(false);
+        }
+    });
     
-    if (game.version > version) {
+    if (game.version > version && game.result.length > 0) {
         setResultLog([...resultLog, ...game.result]);
         setVersion(game.version);
+        setShouldScroll(true);
     }
 
     const renderedResults = resultLog.map(result => <Result user={"Player"} result={result} />);
 
-    return <div id="resultLog">
+    return <div id="resultLog" ref={resultLogRef}>
         {renderedResults}
     </div>;
 

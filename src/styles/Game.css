@@ -46,8 +46,9 @@
 
     border-style: groove;
     border-width: 6px;
-    /* border-color: yellow; */
     background-color: beige;
+
+    overflow-y: scroll;
 }
 
 #field {
