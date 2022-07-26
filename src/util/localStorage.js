@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 /**
- * Store a string value in localeStorage, and hook updates to this
+ * Store a string value in localStorage, and hook updates to this
  * value to the lifecycle of the React component that uses it.
  * 
  * Return an object {value, setValue, removeKey} where

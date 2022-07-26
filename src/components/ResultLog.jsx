@@ -15,12 +15,12 @@ export function ResultLog({game}) {
     const [version, setVersion] = useState(-1);
     const [resultLog, setResultLog] = useState([]);
 
-    const resultLogRef = useRef(null);
+    const elementRef = useRef(null);
     const [shouldScroll, setShouldScroll] = useState(false);
 
     useEffect(() => {
         if (shouldScroll) {
-            resultLogRef.current.scrollTop = resultLogRef.current.scrollHeight;
+            elementRef.current.scrollTop = elementRef.current.scrollHeight;
             setShouldScroll(false);
         }
     });
@@ -31,9 +31,12 @@ export function ResultLog({game}) {
         setShouldScroll(true);
     }
 
-    const renderedResults = resultLog.map(result => <Result user={"Player"} result={result} />);
+    // Note that the index is used as a key. This is safe since results are never removed, and
+    // new results are always added to the back of the list, so the indices are stable
+    // in fact, the results list is a best-known order of results throughout the entire game
+    const renderedResults = resultLog.map((result, index) => <Result user={"Player"} result={result} key={index} />);
 
-    return <div id="resultLog" ref={resultLogRef}>
+    return <div id="resultLog" ref={elementRef}>
         {renderedResults}
     </div>;
 

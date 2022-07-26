@@ -9,9 +9,10 @@ import { ResultLog } from "./ResultLog";
 import * as Robot from 'bot/Robot';
 
 import 'styles/Game.css';
+import { __DEV } from "util/devtools";
 
 const POLL_ON = false;
-const ROBOT_ON = false;
+const ROBOT_ON = true;
 
 function getPlayer(game, user) {
     return game.players.home == user ? 'home' : 'away';
@@ -21,9 +22,23 @@ function getOpponent(player) {
     return player == 'home' ? 'away' : 'home';
 }
 
-export function Game({user, gameId}) {
+/**
+ * Connect the component which uses this hook to a remotely hosted
+ * RSP football game. This hook will return an object with the following:
+ * game: the current game, updates to this game, either via a poll or a response
+ *          to an action will cause a re-render of the using component. Note that this
+ *          will be null before the game has loaded for the first time
+ * dispatchAction: a function which accepts an action, and sends that action to the
+ *                  remote game 
+ */
+function useRemoteGame(gameId, user) {
+    const [game, setGameDelegate] = useState(null);
 
-    const [game, setGame] = useState(null);
+    function setGame(game) {
+        __DEV.currentGame = game;
+        console.log("set dev game");
+        setGameDelegate(game);
+    }
 
     useEffect(() => {
         if (!game) {
@@ -40,14 +55,6 @@ export function Game({user, gameId}) {
         }
     });
 
-    if (!game) {
-        return <div>Loading...</div>;
-    }
-
-    console.log("Rendering game: ", game);
-
-    const player = getPlayer(game, user);
-
     async function dispatchAction(action) {
         console.log("Action dispatched: ", action);
         const response = await postAction(game.gameId, user, action);
@@ -61,9 +68,25 @@ export function Game({user, gameId}) {
         }
     }
 
-    if (ROBOT_ON && user == 'daylin') {
+    return {game, dispatchAction};
+}
+
+
+export function Game({user, gameId}) {
+    const {game, dispatchAction} = useRemoteGame(gameId, user);
+
+    if (!game) {
+        return <div>Loading...</div>;
+    }
+
+    console.log("Rendering game: ", game);
+
+    const player = getPlayer(game, user);
+
+    if (ROBOT_ON && user == 'robot') {
         Robot.takeAction(game, player, dispatchAction);
     }
+
 
     return (
         <div className="game" >
@@ -150,6 +173,7 @@ function ScoreLabel({label, id}) {
 }
 
 function ActionPane({game, player, dispatchAction}) {
+    console.log("rendering actionpane")
     const actions = game.actions[player];
 
     if (actions.includes('RSP')) {
@@ -163,6 +187,9 @@ function ActionPane({game, player, dispatchAction}) {
     }
     if (actions.includes('TOUCHBACK_CHOICE')) {
         return <TouchbackChoicePane dispatchAction={dispatchAction} />;
+    }
+    if (actions.includes('ROLL_AGAIN_CHOICE')) {
+        return <RollAgainChoicePane dispatchAction={dispatchAction} />;
     }
     if (actions.includes('ROLL')) {
         return <RollPane dispatchAction={dispatchAction} game={game} />;
@@ -221,6 +248,17 @@ function TouchbackChoicePane({dispatchAction}) {
         <div>
             <ActionButton onClick={() => dispatch('TOUCHBACK')}>TOUCHBACK</ActionButton>
             <ActionButton onClick={() => dispatch('RETURN')}>ROLL</ActionButton>
+        </div>
+    );
+}
+
+function RollAgainChoicePane({dispatchAction}) {
+    const dispatch = getChoiceActionDispatch(dispatchAction, 'ROLL_AGAIN_CHOICE');
+
+    return (
+        <div>
+            <ActionButton onClick={() => dispatch('ROLL')}>ROLL</ActionButton>
+            <ActionButton onClick={() => dispatch('HOLD')}>HOLD</ActionButton>
         </div>
     );
 }
