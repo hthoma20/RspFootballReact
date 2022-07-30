@@ -1,5 +1,6 @@
+import { Game } from "model/GameModel";
 
-export function getDieCountChoices(game) {
+export function getDieCountChoices(game: Game) {
     switch (game.state) {
         case 'KICKOFF':
             return [3];
@@ -12,4 +13,6 @@ export function getDieCountChoices(game) {
         case 'LONG_RUN_ROLL':
             return [1];
     }
+
+    return [];
 }

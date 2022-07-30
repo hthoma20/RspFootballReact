@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { ReactPropTypes, useEffect, useState } from "react";
 
 import { postAction } from "api/actions";
 import { getGame, pollGame } from "api/games";
@@ -10,17 +10,21 @@ import * as Robot from 'bot/Robot';
 
 import 'styles/Game.css';
 import { __DEV } from "util/devtools";
+import { Game, GameId, Play, Player, UserId } from "model/GameModel";
+import { Action } from "model/ActionModel";
 
 const POLL_ON = false;
 const ROBOT_ON = true;
 
-function getPlayer(game, user) {
+function getPlayer(game: Game, user: UserId): Player {
     return game.players.home == user ? 'home' : 'away';
 }
 
-function getOpponent(player) {
+function getOpponent(player: Player): Player {
     return player == 'home' ? 'away' : 'home';
 }
+
+type ActionDispatch = (action: Action) => Promise<void>;
 
 /**
  * Connect the component which uses this hook to a remotely hosted
@@ -31,10 +35,10 @@ function getOpponent(player) {
  * dispatchAction: a function which accepts an action, and sends that action to the
  *                  remote game 
  */
-function useRemoteGame(gameId, user) {
-    const [game, setGameDelegate] = useState(null);
+function useRemoteGame(gameId: GameId, user: UserId) {
+    const [game, setGameDelegate] = useState(null as Game | null);
 
-    function setGame(game) {
+    function setGame(game: Game) {
         __DEV.currentGame = game;
         console.log("set dev game");
         setGameDelegate(game);
@@ -55,8 +59,14 @@ function useRemoteGame(gameId, user) {
         }
     });
 
-    async function dispatchAction(action) {
+    async function dispatchAction(action: Action): Promise<void> {
         console.log("Action dispatched: ", action);
+
+        if (!game) {
+            console.error("No game to dispatch action to. Game has not been set.");
+            return;
+        }
+
         const response = await postAction(game.gameId, user, action);
 
         if (response.status == 400) {
@@ -71,8 +81,7 @@ function useRemoteGame(gameId, user) {
     return {game, dispatchAction};
 }
 
-
-export function Game({user, gameId}) {
+export function GameComponent({user, gameId}: {user: UserId, gameId: GameId}) {
     const {game, dispatchAction} = useRemoteGame(gameId, user);
 
     if (!game) {
@@ -103,7 +112,7 @@ export function Game({user, gameId}) {
     );
 }
 
-function ScoreBoard({game}) {
+function ScoreBoard({game}: {game: Game}) {
 
     // since plays 1-20 are in quarter 1, shift everything up 19 to line it up
     const quarter = Math.floor((game.playCount + 19)/20);
@@ -148,31 +157,31 @@ function ScoreBoard({game}) {
     );
 }
 
-function DigitDisplay({digit, id}) {
+function DigitDisplay({digit, id}: {digit: number, id: string}) {
         return <img className="digitDisplay"
                 src={getScoreImagePath(digit)}
-                alt={digit}
+                alt={`${digit}`}
                 id={id} />;
 }
 
-function DoubleDigitDisplay({num, id}) {
+function DoubleDigitDisplay({num, id}: {num: number, id: string}) {
 
     const ones = num % 10;
     const tens = Math.floor(num/10);
 
     return (
-        <div id={id} className="digitDisplay doubleDigitDisplay" alt={num} >
+        <div id={id} className="digitDisplay doubleDigitDisplay">
             <img src={getScoreImagePath(tens)} id={id} />
             <img src={getScoreImagePath(ones)} id={id} />
         </div>
     );
 }
 
-function ScoreLabel({label, id}) {
+function ScoreLabel({label, id}: {label: string, id: string}) {
     return <div className="scoreLabel" id={id} >{label}</div>;
 }
 
-function ActionPane({game, player, dispatchAction}) {
+function ActionPane({game, player, dispatchAction}: {game: Game, player: Player, dispatchAction: ActionDispatch}) {
     console.log("rendering actionpane")
     const actions = game.actions[player];
 
@@ -204,9 +213,10 @@ function ActionPane({game, player, dispatchAction}) {
         const opponentAction = game.actions[getOpponent(player)];
         return <div>Waiting for opponent: {opponentAction}</div>
     }
+    return null;
 }
 
-function RspPane({dispatchAction}) {
+function RspPane({dispatchAction}: {dispatchAction: ActionDispatch}) {
 
     const dispatch = getChoiceActionDispatch(dispatchAction, 'RSP');
 
@@ -219,7 +229,7 @@ function RspPane({dispatchAction}) {
     );
 }
 
-function KickoffElectionPane({dispatchAction}) {
+function KickoffElectionPane({dispatchAction}: {dispatchAction: ActionDispatch}) {
     const dispatch = getChoiceActionDispatch(dispatchAction, 'KICKOFF_ELECTION');
 
     return (
@@ -230,7 +240,7 @@ function KickoffElectionPane({dispatchAction}) {
     );
 }
 
-function KickoffChoicePane({dispatchAction}) {
+function KickoffChoicePane({dispatchAction}: {dispatchAction: ActionDispatch}) {
     const dispatch = getChoiceActionDispatch(dispatchAction, 'KICKOFF_CHOICE');
 
     return (
@@ -241,7 +251,7 @@ function KickoffChoicePane({dispatchAction}) {
     );
 }
 
-function TouchbackChoicePane({dispatchAction}) {
+function TouchbackChoicePane({dispatchAction}: {dispatchAction: ActionDispatch}) {
     const dispatch = getChoiceActionDispatch(dispatchAction, 'TOUCHBACK_CHOICE');
 
     return (
@@ -252,7 +262,7 @@ function TouchbackChoicePane({dispatchAction}) {
     );
 }
 
-function RollAgainChoicePane({dispatchAction}) {
+function RollAgainChoicePane({dispatchAction}: {dispatchAction: ActionDispatch}) {
     const dispatch = getChoiceActionDispatch(dispatchAction, 'ROLL_AGAIN_CHOICE');
 
     return (
@@ -263,9 +273,9 @@ function RollAgainChoicePane({dispatchAction}) {
     );
 }
 
-function RollPane({dispatchAction, game}) {
+function RollPane({dispatchAction, game}: {dispatchAction: ActionDispatch, game: Game}) {
 
-    function dispatchRollAction(count) {
+    function dispatchRollAction(count: number) {
         dispatchAction({
             name: "ROLL",
             count: count
@@ -289,9 +299,9 @@ function RollPane({dispatchAction, game}) {
     );
 }
 
-function CallPlayPane({dispatchAction, game}) {
+function CallPlayPane({dispatchAction, game}: {dispatchAction: ActionDispatch, game: Game}) {
     
-    function dispatchPlayAction(play) {
+    function dispatchPlayAction(play: Play) {
         dispatchAction({
             name: "CALL_PLAY",
             play: play
@@ -306,7 +316,7 @@ function CallPlayPane({dispatchAction, game}) {
     );
 }
 
-function PatPane({dispatchAction, game}) {
+function PatPane({dispatchAction, game}: {dispatchAction: ActionDispatch, game: Game}) {
     const dispatch = getChoiceActionDispatch(dispatchAction, 'PAT_CHOICE');
 
     return (
@@ -317,8 +327,8 @@ function PatPane({dispatchAction, game}) {
     )
 }
 
-function getChoiceActionDispatch(dispatchAction, choiceName) {
-    return (choice) => {
+function getChoiceActionDispatch(dispatchAction: ActionDispatch, choiceName: string) {
+    return (choice: string) => {
         dispatchAction({
             name: choiceName,
             choice: choice
@@ -326,7 +336,7 @@ function getChoiceActionDispatch(dispatchAction, choiceName) {
     }
 }
 
-function ActionButton(props) {
+function ActionButton(props: {onClick: () => void, children: React.ReactNode}) {
     return (
         <button className="actionButton" onClick={props.onClick}>
             {props.children}

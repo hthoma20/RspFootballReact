@@ -1,6 +1,6 @@
 import { useLocalStorage } from 'util/localStorage';
 
-import { Game } from './Game';
+import { GameComponent } from './Game';
 import { GamePicker } from './GamePicker';
 import { Login } from './Login';
 import { NavigationBar } from './NavigationBar';
@@ -39,7 +39,7 @@ function MainContent({user, setUser, gameId, setGameId}) {
             user={user} />;
     }
 
-    return <Game
+    return <GameComponent
         user={user}
         gameId={gameId} />;
 }
