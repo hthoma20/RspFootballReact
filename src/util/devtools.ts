@@ -1,4 +1,4 @@
-import { Game } from "model/GameModel";
+import { Game } from "model/gameModel";
 
 
 export const __DEV = {

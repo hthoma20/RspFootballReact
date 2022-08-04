@@ -1,4 +1,4 @@
-import { Game } from "model/GameModel";
+import { Game } from "model/gameModel";
 
 export function getDieCountChoices(game: Game) {
     switch (game.state) {

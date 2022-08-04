@@ -1,4 +1,4 @@
-import { ReactPropTypes, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { postAction } from "api/actions";
 import { getGame, pollGame } from "api/games";
@@ -10,8 +10,10 @@ import * as Robot from 'bot/Robot';
 
 import 'styles/Game.css';
 import { __DEV } from "util/devtools";
-import { Game, GameId, Play, Player, UserId } from "model/GameModel";
-import { Action } from "model/ActionModel";
+import { Game, GameId, Play, Player, UserId } from "model/gameModel";
+import { Action } from "model/actionModel";
+import { RenderStateMachine, RENDER_START_STATE, RENDER_STATE_MACHINE } from "model/renderStateMachine";
+import { useStateMachine } from "util/stateMachine";
 
 const POLL_ON = false;
 const ROBOT_ON = true;
@@ -59,7 +61,7 @@ function useRemoteGame(gameId: GameId, user: UserId) {
         }
     });
 
-    async function dispatchAction(action: Action): Promise<void> {
+    async function dispatchGameAction(action: Action): Promise<void> {
         console.log("Action dispatched: ", action);
 
         if (!game) {
@@ -78,11 +80,14 @@ function useRemoteGame(gameId: GameId, user: UserId) {
         }
     }
 
-    return {game, dispatchAction};
+    return {game, dispatchGameAction};
 }
 
 export function GameComponent({user, gameId}: {user: UserId, gameId: GameId}) {
-    const {game, dispatchAction} = useRemoteGame(gameId, user);
+    const {game, dispatchGameAction} = useRemoteGame(gameId, user);
+
+    const renderState: RenderStateMachine = useStateMachine(RENDER_STATE_MACHINE, RENDER_START_STATE);
+
 
     if (!game) {
         return <div>Loading...</div>;
@@ -93,7 +98,7 @@ export function GameComponent({user, gameId}: {user: UserId, gameId: GameId}) {
     const player = getPlayer(game, user);
 
     if (ROBOT_ON && user == 'robot') {
-        Robot.takeAction(game, player, dispatchAction);
+        Robot.takeAction(game, player, dispatchGameAction);
     }
 
 
@@ -106,7 +111,7 @@ export function GameComponent({user, gameId}: {user: UserId, gameId: GameId}) {
                 <ResultLog game={game} />
             </div> 
             <div id="actionPane" >
-                <ActionPane game={game} player={player} dispatchAction={dispatchAction} />
+                <ActionPane game={game} player={player} dispatchAction={dispatchGameAction} />
             </div>
         </div>
     );

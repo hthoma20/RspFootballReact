@@ -1,4 +1,4 @@
-import { ActionName } from "./ActionModel";
+import { ActionName } from "./actionModel";
 
 export type GameId = string;
 export type UserId = string;
