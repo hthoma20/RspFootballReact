@@ -18,7 +18,7 @@ import 'styles/Game.css';
  * paintCanvas reads the animation state to update the display. 
  */
 export function GameCanvas({game, player}) {
-
+    
     const canvasRef = useRef(null);
 
     const animationStateRef = useRef(getInitialAnimationState());

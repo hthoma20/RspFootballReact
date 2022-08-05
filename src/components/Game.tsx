@@ -12,10 +12,10 @@ import 'styles/Game.css';
 import { __DEV } from "util/devtools";
 import { Game, GameId, Play, Player, UserId } from "model/gameModel";
 import { Action } from "model/actionModel";
-import { RenderStateMachine, RENDER_START_STATE, RENDER_STATE_MACHINE } from "model/renderStateMachine";
+import { RenderStateMachine, RENDER_START_STATE, RENDER_STATE_MACHINE } from "util/renderStateMachine";
 import { useStateMachine } from "util/stateMachine";
 
-const POLL_ON = false;
+const POLL_ON = true;
 const ROBOT_ON = true;
 
 function getPlayer(game: Game, user: UserId): Player {
@@ -38,7 +38,7 @@ type ActionDispatch = (action: Action) => Promise<void>;
  *                  remote game 
  */
 function useRemoteGame(gameId: GameId, user: UserId) {
-    const [game, setGameDelegate] = useState(null as Game | null);
+    const [game, setGameDelegate] = useState<Game | null>(null);
 
     function setGame(game: Game) {
         __DEV.currentGame = game;
@@ -87,7 +87,7 @@ export function GameComponent({user, gameId}: {user: UserId, gameId: GameId}) {
     const {game, dispatchGameAction} = useRemoteGame(gameId, user);
 
     const renderState: RenderStateMachine = useStateMachine(RENDER_STATE_MACHINE, RENDER_START_STATE);
-
+    __DEV.renderState = renderState.currentState;
 
     if (!game) {
         return <div>Loading...</div>;
@@ -101,14 +101,13 @@ export function GameComponent({user, gameId}: {user: UserId, gameId: GameId}) {
         Robot.takeAction(game, player, dispatchGameAction);
     }
 
-
     return (
         <div className="game" >
             <ScoreBoard game={game} />
             
             <div id="middlePane">
                 <GameCanvas game={game} player={player} />
-                <ResultLog game={game} />
+                <ResultLog game={game} renderState={renderState} />
             </div> 
             <div id="actionPane" >
                 <ActionPane game={game} player={player} dispatchAction={dispatchGameAction} />
