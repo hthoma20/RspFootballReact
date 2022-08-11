@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-function getImage(path) {
+function getImage(path: string) {
     const image = new Image();
     
     image.src = path;
@@ -8,8 +8,8 @@ function getImage(path) {
 }
 
 // return a promise that resolves when the image loads
-function imageOnloadPromise(image) {
-    return new Promise(resolve => {
+function imageOnloadPromise(image: HTMLImageElement) {
+    return new Promise<void>(resolve => {
         image.onload = () => {
             console.log("Image loaded: ", image);
             resolve();
@@ -21,7 +21,7 @@ function imageOnloadPromise(image) {
  * return a tuple, [image, imageLoaded]
  * when the image loads, the component will re-render
  */
-export function useImage(imagePath) {
+export function useImage(imagePath: string) {
 
     const image = getImage(imagePath);
     const [imageLoaded, setImageLoaded] = useState(false);
@@ -39,15 +39,19 @@ export function useImage(imagePath) {
 // when all images are loaded, the component will re-render
 // imagePaths should be given as a plain object, {key: imagePath}
 // the returned images will be an object, {key: image}
-export function useImages(imagePaths) {
+export function useImages<T extends string>(imagePaths: {[key in T]: string}):
+    [{[key in T]: HTMLImageElement}, boolean] {
+        
     const images = Object.fromEntries(
         Object.entries(imagePaths)
-            .map(([key, imagePath]) => [key, getImage(imagePath)]));
+            .map(([key, imagePath]) => [key, getImage(imagePath as string)])) as {[key in T]: HTMLImageElement};
 
     const [imagesLoaded, setImagesLoaded] = useState(false);
 
     useEffect(() => {
-        Promise.all(Object.values(images).map(imageOnloadPromise)).then(() => {
+        const values: HTMLImageElement[] = Object.values(images);
+        const loadPromises = values.map(imageOnloadPromise);
+        Promise.all(loadPromises).then(() => {
             setImagesLoaded(true);
         });
     }, []);
@@ -55,6 +59,6 @@ export function useImages(imagePaths) {
     return [images, imagesLoaded];
 }
 
-export function getScoreImagePath(digit) {
+export function getScoreImagePath(digit: number) {
     return `score/${digit}.png`;
 }

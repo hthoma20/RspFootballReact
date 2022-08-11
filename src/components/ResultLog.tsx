@@ -1,9 +1,10 @@
-import { Game, Result, UserId } from "model/gameModel";
-import { RenderStateMachine, useRenderStateMachine } from "util/renderStateMachine";
 import { useEffect } from "react";
 import { useRef, useState } from "react";
 
+import { Game, UserId } from "model/gameModel";
+import { RenderStateMachine, useRenderStateMachine } from "util/renderStateMachine";
 import { getRspWinner } from 'util/rsp';
+import { Result, RollResult, RspResult } from "model/resultModel";
 
 
 
@@ -54,15 +55,15 @@ type ResultProps = {user: UserId, result: Result};
 function ResultComponent({user, result}: ResultProps) {
     switch(result.name) {
         case 'ROLL':
-            return <RollResult user={user} result={result} />;
+            return <RollResultComponent user={user} result={result} />;
         case 'RSP':
-            return <RspResult user={user} result={result} />;
+            return <RspResultComponent user={user} result={result} />;
     }
     console.error(`Unrecognized result ${result}`);
     return null;
 }
 
-function RollResult({user, result}: ResultProps) {
+function RollResultComponent({user, result}: ResultProps & {result: RollResult}) {
     if (result.roll.length == 0) {
         return null;
     }
@@ -73,7 +74,7 @@ function RollResult({user, result}: ResultProps) {
     return <div>{user} rolled {article} {roll}</div>;
 }
 
-function RspResult({user, result}: ResultProps) {
+function RspResultComponent({user, result}: ResultProps & {result: RspResult}) {
     const winner = getRspWinner(result);
     const log = winner ? `${winner} won the RSP.` : `RSP tied.`;
 

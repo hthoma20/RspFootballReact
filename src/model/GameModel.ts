@@ -1,11 +1,11 @@
 import { ActionName } from "./actionModel";
+import { RspChoice } from "./choiceModel";
+import { Result } from "./resultModel";
 
 export type GameId = string;
 export type UserId = string;
 export type State = string;
 export type Play = string;
-export type Result = any;
-export type RspChoice = string;
 
 export type Player = 'home' | 'away';
 

@@ -3,6 +3,24 @@ import { useEffect, useRef, useState } from "react";
 import { useImage, useImages } from "util/images";
 
 import 'styles/Game.css';
+import { Game, Player } from "model/gameModel";
+import { Result, ResultName } from "model/resultModel";
+import { RspChoice } from "model/choiceModel";
+
+type RspImage = 'fistLeft' | 'fistRight' | 'rock' | 'paper' | 'scissors';
+type Die = {face: number, x: number, y: number, dx: number, dy: number};
+type AnimationState = {
+    version: number;
+    rsp: {x: number, y: number, image: RspImage}[];
+    roll: Die[];
+    text: {[key in string]: {x?: number, y?: number, size?: number, text: string}};
+    firstDown: number | null;
+    ballpos: number | null;
+};
+type Animation = Generator<undefined, void, unknown>;
+
+type ImageNames = 'field' | 'ball' | 'rock' | 'paper' | 'scissors' | 'fistLeft' | 'fistRight' | 'dice';
+type Images = {[key in ImageNames]: HTMLImageElement}
 
 /**
  * The GameCanvas is responsible for displaying the current state of the game
@@ -11,19 +29,19 @@ import 'styles/Game.css';
  * 
  * On the first render an inital animationState is created.
  * This state is saved across renders, but it is not tied to React state so changes
- * do not cause re-renders.
+ * does not cause re-renders.
  * 
  * Everytime a render with an updated game occurs, a new animation is created via getAnimation.
  * The animation is a generator which mutates the animationState and `yield`s when the frame should be displayed.
  * paintCanvas reads the animation state to update the display. 
  */
-export function GameCanvas({game, player}) {
+export function GameCanvas({game, player}: {game: Game, player: Player}) {
     
-    const canvasRef = useRef(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const animationStateRef = useRef(getInitialAnimationState());
-    const animationRef = useRef(function*(){}());
-    const animationFrameRequestRef = useRef(null);  
+    const animationRef = useRef<Animation>(function*(){}());
+    const animationFrameRequestRef = useRef<number | null>(null);  
 
     const [images, imagesLoaded] = useImages({
         field: 'field.png',
@@ -49,12 +67,18 @@ export function GameCanvas({game, player}) {
         }
 
         const canvas = canvasRef.current;
+        if (canvas == null) {
+            return;
+        }
+
         fix_dpi(canvas);
 
         console.log(`Starting animation. Version ${game.version}`);
         animationStateRef.current.version = game.version;
         animationRef.current = getAnimation(animationStateRef.current, game, player, canvas.width, canvas.height);
-        window.cancelAnimationFrame(animationFrameRequestRef.current);
+        if (animationFrameRequestRef.current !== null) {
+            window.cancelAnimationFrame(animationFrameRequestRef.current!);
+        }
 
         function animationExecutor() {
             const animationDone = animationRef.current.next().done;
@@ -62,7 +86,7 @@ export function GameCanvas({game, player}) {
                 console.log(`Animation complete. Version ${animationStateRef.current.version}`);
                 return;
             }
-            paintCanvas(canvas, images, animationStateRef.current, player);
+            paintCanvas(canvas!, images, animationStateRef.current, player);
             animationFrameRequestRef.current = window.requestAnimationFrame(animationExecutor);
         }
 
@@ -77,19 +101,23 @@ export function GameCanvas({game, player}) {
 
 // scale the canvas appropriately for the pixel ratio
 // see https://medium.com/wdstack/fixing-html5-2d-canvas-blur-8ebe27db07da
-function fix_dpi(canvas) {
+function fix_dpi(canvas: HTMLCanvasElement) {
     const dpi = window.devicePixelRatio;
     const style = getComputedStyle(canvas);
-    const style_width = Number(style.width.match(/(.*)px/)[1]);
-    const style_height = Number(style.height.match(/(.*)px/)[1]);
+    const style_width = Number(style.width.match(/(.*)px/)![1]);
+    const style_height = Number(style.height.match(/(.*)px/)![1]);
     
     canvas.width = style_width * dpi;
     canvas.height = style_height * dpi;
 }
 
-function paintCanvas(canvas, images, animationState, player) {
+function paintCanvas(canvas: HTMLCanvasElement, images: Images, animationState: AnimationState, player: Player) {
     // console.log("animationState:", animationState);
     const ctx = canvas.getContext('2d');
+
+    if (ctx == null) {
+        return;
+    }
 
     // draw field
     ctx.drawImage(images.field, 0, 0, canvas.width, canvas.height);
@@ -105,12 +133,12 @@ function paintCanvas(canvas, images, animationState, player) {
     }
 
     // draw text
-    for (let text of Object.values(animationState.text)) {
-        text = {
+    for (let textModel of Object.values(animationState.text)) {
+        const text = {
             size: canvas.height/3,
             x: canvas.width/2,
             y: canvas.height/2,
-            ...text
+            ...textModel
         };
 
         ctx.font = `${text.size}px Arial`;
@@ -123,10 +151,12 @@ function paintCanvas(canvas, images, animationState, player) {
     const ballWidth = yardsToPixels(5, canvas.width);
     const ballHeight = .67*ballWidth;
 
-    ctx.drawImage(images.ball,
-        animationState.ballpos - ballWidth/2,
-        canvas.height/2 - ballHeight/2,
-        ballWidth, ballHeight);
+    if (animationState.ballpos !== null) {
+        ctx.drawImage(images.ball,
+            animationState.ballpos - ballWidth/2,
+            canvas.height/2 - ballHeight/2,
+            ballWidth, ballHeight);
+    }
     
     // draw RSP
     for (let rsp of animationState.rsp) {
@@ -142,7 +172,7 @@ function paintCanvas(canvas, images, animationState, player) {
     }
 }
 
-function drawDie(ctx, image, sideLength, die) {
+function drawDie(ctx: CanvasRenderingContext2D, image: CanvasImageSource, sideLength: number, die: Die) {
     // the source image is a grid with dimension 640*427 pixels, with each die image
     // arranged as below
     // 1 2 3
@@ -164,12 +194,14 @@ function drawDie(ctx, image, sideLength, die) {
         sideLength);
 }
 
-function getInitialAnimationState() {
+function getInitialAnimationState(): AnimationState {
     return {
         version: -1,
         rsp: [],
         roll: [],
-        text: [],
+        text: {},
+        ballpos: null,
+        firstDown: null
     };
 }
 
@@ -180,7 +212,8 @@ function getInitialAnimationState() {
  * Note that nothing is yielded, the new frame is communicated by mutations to
  * the given animationState
  */
-function* getAnimation(animationState, game, player, canvasWidth, canvasHeight) {
+function* getAnimation(animationState: AnimationState, game: Game, player: Player,
+    canvasWidth: number, canvasHeight: number): Animation {
 
     getCurrentPlayFrame(animationState, game, player, canvasWidth, canvasHeight);
     yield;
@@ -205,7 +238,8 @@ function* getAnimation(animationState, game, player, canvasWidth, canvasHeight) 
     yield;
 }
 
-function getGameOverFrame(animationState, game, player, canvasWidth, canvasHeight) {
+function getGameOverFrame(animationState: AnimationState, game: Game, player: Player,
+    canvasWidth: number, canvasHeight: number) {
     if (game.state == 'GAME_OVER') {
         animationState.text.gameOver = {
             x: canvasWidth/2,
@@ -219,7 +253,8 @@ function getGameOverFrame(animationState, game, player, canvasWidth, canvasHeigh
     }
 }
 
-function getCurrentPlayFrame(animationState, game, player, canvasWidth, canvasHeight) {
+function getCurrentPlayFrame(animationState: AnimationState, game: Game, player: Player,
+    canvasWidth: number, canvasHeight: number) {
 
     if (game.state == 'FUMBLE') {
         animationState.text.currentPlay = {
@@ -236,7 +271,7 @@ function getCurrentPlayFrame(animationState, game, player, canvasWidth, canvasHe
         return;
     }
 
-    function upperFirstLetter(word) {
+    function upperFirstLetter(word: string) {
         return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
     }
 
@@ -249,7 +284,8 @@ function getCurrentPlayFrame(animationState, game, player, canvasWidth, canvasHe
     };
 }
 
-function* getRspAnimation(animationState, game, player, canvasWidth, canvasHeight) {
+function* getRspAnimation(animationState: AnimationState, game: Game, player: Player,
+    canvasWidth: number, canvasHeight: number): Animation {
     // draw RSP
     const rspResult = getResult(game, 'RSP');
 
@@ -258,19 +294,19 @@ function* getRspAnimation(animationState, game, player, canvasWidth, canvasHeigh
         return;
     }
 
-    function initRspObject(rspPlayer) {
+    function initRspObject(rspPlayer: Player) {
         const isLeft = player == rspPlayer;
         const fieldPos = isLeft ? 40 : 60;
-        const image = isLeft ? 'fistLeft' : 'fistRight';
+        const image: 'fistLeft' | 'fistRight' = isLeft ? 'fistLeft' : 'fistRight';
 
         return {
-            image,
+            image: image,
             x: yardLineToPixels(fieldPos, canvasWidth),
             y: canvasHeight/2
         };
     }
 
-    animationState.rsp = ['home', 'away'].map(initRspObject);
+    animationState.rsp = (['home', 'away'] as Player[]).map(initRspObject);
     yield;
 
     const bounceFrames = 20;
@@ -287,12 +323,13 @@ function* getRspAnimation(animationState, game, player, canvasWidth, canvasHeigh
 
     // indexes are defined by the initial mapping
     const homeIndex = 0, awayIndex = 1;
-    animationState.rsp[homeIndex].image = rspResult.home.toLowerCase();
-    animationState.rsp[awayIndex].image = rspResult.away.toLowerCase();
+    animationState.rsp[homeIndex].image = rspResult.home.toLowerCase() as RspImage;
+    animationState.rsp[awayIndex].image = rspResult.away.toLowerCase() as RspImage;
     yield;
 }
 
-function* getDiceAnimation(animationState, game, player, canvasWidth, canvasHeight) {
+function* getDiceAnimation(animationState: AnimationState, game: Game, player: Player,
+    canvasWidth: number, canvasHeight: number): Animation {
 
     const result = getResult(game, 'ROLL');
 
@@ -326,7 +363,7 @@ function* getDiceAnimation(animationState, game, player, canvasWidth, canvasHeig
 }
 
 // note that threshold must be less than acceleration
-function* getDieAnimation(die, floorY, acceleration, damping, threshold) {
+function* getDieAnimation(die: Die, floorY: number, acceleration: number, damping: number, threshold: number): Animation {
     // if the threshold is greater than the acceleration, it is possible to accelerate "over the threshold" and
     // bounce forever
     threshold = Math.min(acceleration, threshold);
@@ -358,7 +395,8 @@ function getRandomDieFace() {
 }
 
 
-function* getBallAnimation(animationState, game, player, canvasWidth) {
+function* getBallAnimation(animationState: AnimationState, game: Game, player: Player,
+    canvasWidth: number): Animation {
     const pixelBallpos = yardLineToPixels(game.ballpos, canvasWidth, game, player);
 
     if (!animationState.ballpos) {
@@ -389,7 +427,8 @@ function* getBallAnimation(animationState, game, player, canvasWidth) {
     }
 }
 
-function* getFirstDownAnimation(animationState, game, player, canvasWidth) {
+function* getFirstDownAnimation(animationState: AnimationState, game: Game, player: Player,
+    canvasWidth: number): Animation {
     if (!game.firstDown) {
         animationState.firstDown = null;
         yield;
@@ -411,7 +450,7 @@ function* getFirstDownAnimation(animationState, game, player, canvasWidth) {
     }
 }
 
-function* getTween(start, finish) {
+function* getTween(start: number, finish: number) {
     const distanceInPixels = finish - start;
     const tweenFrames = getTweenFrames(distanceInPixels);
     const pixelsPerFrame = distanceInPixels / tweenFrames;
@@ -425,7 +464,7 @@ function* getTween(start, finish) {
     yield finish;
 }
 
-function getTweenFrames(distanceInPixels) {
+function getTweenFrames(distanceInPixels: number) {
     distanceInPixels = Math.abs(distanceInPixels);
     if (distanceInPixels < 50) {
         return 20;
@@ -442,7 +481,7 @@ function getTweenFrames(distanceInPixels) {
 
 
 // given a list of animations, advance each a frame before yielding
-function* getParallelAnimation(animations) {
+function* getParallelAnimation(animations: Animation[]): Animation {
     let hasIncompleteAnimation = true;
 
     while (hasIncompleteAnimation) {
@@ -459,16 +498,18 @@ function* getParallelAnimation(animations) {
 
 
 // return a result of the given name
-// undefined if not present
-function getResult(game, resultName) {
-    return game.result.find(result => result.name == resultName);
+// null if not present
+function getResult<ResultT extends ResultName>(game: Game, resultName: ResultT) {
+    type ResultType = Extract<Result, {name: ResultT}>; // this picks the type that matches the given result name
+    const matchingResult = game.result.find(result => result.name === resultName) as ResultType | undefined;
+    return matchingResult ? matchingResult : null;
 }
 
 // return the number of pixels from the left of the canvas
 // which corresponds with the given yardLine
 // if the optional game and player arguments are included, take into account the given
 // players point of veiw in the context of the game
-function yardLineToPixels(yardLine, canvasWidth, game, player) {
+function yardLineToPixels(yardLine: number, canvasWidth: number, game?: Game, player?: Player) {
 
     if (game && player) {
         yardLine = game.possession == player ? yardLine : 100-yardLine;
@@ -479,45 +520,6 @@ function yardLineToPixels(yardLine, canvasWidth, game, player) {
 }
 
 // return the number of pixels that represents the number of yards
-function yardsToPixels(yards, canvasWidth) {
+function yardsToPixels(yards: number, canvasWidth: number) {
     return yards * (canvasWidth/120);
 }
-
-
-function Field({game, player, setIsAnimating}) {
-    
-    const canvasRef = useRef(null);
-    const [fieldImage, fieldLoaded] = useImage('field.png');
-    const [ballImage, ballLoaded] = useImage('football.png');
-    const [diceImage, diceLoaded] = useImage('dice.png');
-    const [rockImage, rockLoaded] = useImage('rock.png');
-    const [scissorsImage, scissorsLoaded] = useImage('scissors.png');
-    const [paperImage, paperLoaded] = useImage('paper.png');
-
-    useEffect(() => {
-
-        if (!(fieldLoaded && ballLoaded && diceLoaded)) {
-            return;
-        }
-
-        const canvas = canvasRef.current;
-
-        const ctx = canvas.getContext('2d');
-
-
-        // display current play
-        ctx.font = "30px Arial";
-        ctx.fillStyle = '#000';
-        ctx.textAlign = 'center';
-        ctx.fillText(game.play, canvas.width/2, 0.3*canvas.height);
-
-    }, [game, fieldLoaded, ballLoaded, diceLoaded, rockLoaded, scissorsLoaded, paperLoaded]);
-
-    return (
-        <canvas id="field" ref={canvasRef} />
-    );
-}
-
-
-
-

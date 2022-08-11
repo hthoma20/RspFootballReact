@@ -1,3 +1,4 @@
+import { RspChoice } from "model/choiceModel";
 
 const RSP_BEATS = {
     ROCK: 'SCISSORS',
@@ -9,7 +10,7 @@ const RSP_BEATS = {
  * return 'home', 'away', or null
  * based on the winner (null for a tie)
  */
-export function getRspWinner(rsp) {
+export function getRspWinner(rsp: {home: RspChoice, away: RspChoice}) {
     if (rsp.home == rsp.away) {
         return null;
     }
