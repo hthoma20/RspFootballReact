@@ -12,11 +12,10 @@ import 'styles/Game.css';
 import { __DEV } from "util/devtools";
 import { Game, GameId, Play, Player, UserId } from "model/gameModel";
 import { Action } from "model/actionModel";
-import { RenderStateMachine, RENDER_START_STATE, RENDER_STATE_MACHINE } from "util/renderStateMachine";
-import { useStateMachine } from "util/stateMachine";
+import React from "react";
 
 const POLL_ON = true;
-const ROBOT_ON = true;
+const ROBOT_ON = false;
 
 function getPlayer(game: Game, user: UserId): Player {
     return game.players.home == user ? 'home' : 'away';
@@ -42,7 +41,6 @@ function useRemoteGame(gameId: GameId, user: UserId) {
 
     function setGame(game: Game) {
         __DEV.currentGame = game;
-        console.log("set dev game");
         setGameDelegate(game);
     }
 
@@ -83,11 +81,73 @@ function useRemoteGame(gameId: GameId, user: UserId) {
     return {game, dispatchGameAction};
 }
 
+interface GameRegistry {
+    size(): number;
+    peek(): Game | null;
+    getCurrentGame(): Game | null;
+    getGame(version: number) : Game | null;
+}
+
+class GameRegistry {
+
+    private games: Game[];
+    private currentVersion: number;
+
+    constructor(games: Game[], currentVersion: number) {
+        this.games = games;
+        this.currentVersion = currentVersion;
+    }
+
+
+    size = () => this.games.length;
+    peek  = () => (this.games[0] || null);
+    getCurrentGame = () => this.getGame(this.currentVersion) || null;
+    getGame = (version: number) => this.games.find(game => game.version == version) || null;
+}
+
+/**
+ * Keep track of every version of the game that has been seen,
+ * except those games which have explicitly been requested to drop
+ * 
+ * @param game the most up-to date version of the game
+ * @return two items:
+ * 1 - A list of registered games
+ * 2 - A function which informs this hook that a version is no longer needed.
+ *      calling this function can signal the hook that all lower versions may
+ *      be de-registered as well
+ */
+function useGameRegistry(game: Game | null): [GameRegistry, (dropVersion: number) => void] {
+
+    const initialGames = game === null ? [] : [game];
+    const [games, setGames] = useState(initialGames);
+    const [currentVersion, setCurrentVersion] = useState(-1);
+
+
+    if (game !== null && game.version > currentVersion) {
+        setCurrentVersion(game.version);
+        setGames([...games, game]);
+    }
+
+    function dropVersion(version: number) {
+        setGames(games.filter(game => game.version > version));
+    }
+
+    return [new GameRegistry(games, currentVersion), dropVersion];
+}
+
+
+
 export function GameComponent({user, gameId}: {user: UserId, gameId: GameId}) {
     const {game, dispatchGameAction} = useRemoteGame(gameId, user);
 
-    const renderState: RenderStateMachine = useStateMachine(RENDER_STATE_MACHINE, RENDER_START_STATE);
-    __DEV.renderState = renderState.currentState;
+    const [animationQueue, dequeueGameVersion] = useGameRegistry(game);
+
+    // the game that is actively being animated
+    // null if the there is no animation ongoing
+    const [animatingGame, setAnimatingGame] = useState(null as Game | null);
+    // the game that is displayed on the scoreboard, etc
+    // null only if there has hasn't been a game yet
+    const [displayedGame, setDisplayedVersion] = useState(null as Game | null);
 
     if (!game) {
         return <div>Loading...</div>;
@@ -95,28 +155,50 @@ export function GameComponent({user, gameId}: {user: UserId, gameId: GameId}) {
 
     console.log("Rendering game: ", game);
 
+    // if there is a new animation that we should play
+    if (animatingGame === null && animationQueue.size() > 0) {
+        setAnimatingGame(animationQueue.peek()!);
+    }
+
+    function animationComplete() {
+        if (animatingGame === null) {
+            console.error("Animation marked complete for null Game");
+            return;
+        }
+        dequeueGameVersion(animatingGame.version);
+        setDisplayedVersion(animatingGame);
+        setAnimatingGame(null);
+    }
+
     const player = getPlayer(game, user);
 
     if (ROBOT_ON && user == 'robot') {
         Robot.takeAction(game, player, dispatchGameAction);
     }
 
+    const fieldGame: Game | null = animatingGame ?? displayedGame;
+    const actionPaneGame: Game | null = game;//gameRegistry.getCurrentGame();
+    
     return (
         <div className="game" >
-            <ScoreBoard game={game} />
+            <ScoreBoard game={displayedGame} />
             
             <div id="middlePane">
-                <GameCanvas game={game} player={player} />
-                <ResultLog game={game} renderState={renderState} />
+                <GameCanvas game={fieldGame} player={player} animationComplete={animationComplete} />
+                <ResultLog game={displayedGame} />
             </div> 
             <div id="actionPane" >
-                <ActionPane game={game} player={player} dispatchAction={dispatchGameAction} />
+                <ActionPane game={displayedGame} player={player} dispatchAction={dispatchGameAction} />
             </div>
         </div>
     );
 }
 
-function ScoreBoard({game}: {game: Game}) {
+function ScoreBoard({game}: {game: Game | null}) {
+
+    if (game === null) {
+        return <div id="scoreBoard" />;
+    }
 
     // since plays 1-20 are in quarter 1, shift everything up 19 to line it up
     const quarter = Math.floor((game.playCount + 19)/20);
@@ -185,8 +267,11 @@ function ScoreLabel({label, id}: {label: string, id: string}) {
     return <div className="scoreLabel" id={id} >{label}</div>;
 }
 
-function ActionPane({game, player, dispatchAction}: {game: Game, player: Player, dispatchAction: ActionDispatch}) {
-    console.log("rendering actionpane")
+function ActionPane({game, player, dispatchAction}: {game: Game | null, player: Player, dispatchAction: ActionDispatch}) {
+    if (game === null) {
+        return null;
+    }
+
     const actions = game.actions[player];
 
     if (actions.includes('RSP')) {

@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useRef, useState } from "react";
 
 import { Game, UserId } from "model/gameModel";
-import { RenderStateMachine, useRenderStateMachine } from "util/renderStateMachine";
 import { getRspWinner } from 'util/rsp';
 import { Result, RollResult, RspResult } from "model/resultModel";
 
@@ -15,15 +14,13 @@ import { Result, RollResult, RspResult } from "model/resultModel";
  * lifetime. Each render, the results of the given game are added to the running log,
  * and de-duplicated (it is safe to re-render this component)
  */
-export function ResultLog({game, renderState}: {game: Game, renderState: RenderStateMachine}) {
+export function ResultLog({game}: {game: Game | null}) {
     // the most recently rendered game version
     const [version, setVersion] = useState(-1);
     const [resultLog, setResultLog] = useState<Result[]>([]);
 
     const elementRef = useRef<HTMLDivElement>(null);
     const [shouldScroll, setShouldScroll] = useState(false);
-
-    game = useRenderStateMachine(game, renderState, 'UPDATING_RESULT_LOG', 'RESULT_LOG_UPDATED');
 
     useEffect(() => {
         if (shouldScroll && elementRef.current != null) {
@@ -32,7 +29,7 @@ export function ResultLog({game, renderState}: {game: Game, renderState: RenderS
         }
     });
     
-    if (game.version > version && game.result.length > 0) {
+    if (game !== null && game.version > version && game.result.length > 0) {
         setResultLog([...resultLog, ...game.result]);
         setVersion(game.version);
         setShouldScroll(true);

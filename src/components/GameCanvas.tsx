@@ -5,7 +5,6 @@ import { useImage, useImages } from "util/images";
 import 'styles/Game.css';
 import { Game, Player } from "model/gameModel";
 import { Result, ResultName } from "model/resultModel";
-import { RspChoice } from "model/choiceModel";
 
 type RspImage = 'fistLeft' | 'fistRight' | 'rock' | 'paper' | 'scissors';
 type Die = {face: number, x: number, y: number, dx: number, dy: number};
@@ -35,7 +34,8 @@ type Images = {[key in ImageNames]: HTMLImageElement}
  * The animation is a generator which mutates the animationState and `yield`s when the frame should be displayed.
  * paintCanvas reads the animation state to update the display. 
  */
-export function GameCanvas({game, player}: {game: Game, player: Player}) {
+export function GameCanvas({game, player, animationComplete}:
+    {game: Game | null, player: Player, animationComplete: () => void}) {
     
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -55,14 +55,14 @@ export function GameCanvas({game, player}: {game: Game, player: Player}) {
     });
 
     useEffect(() => {
-        if (!imagesLoaded) {
+        if (!imagesLoaded || game === null) {
             return;
         }
 
         // This is the case of a poll returning a known version
         // in this case, we are already in progress with the relevant animation
         // or it has completed
-        if (animationStateRef.current.version == game.version) {
+        if (animationStateRef.current.version === game.version) {
             return;
         }
 
@@ -74,6 +74,7 @@ export function GameCanvas({game, player}: {game: Game, player: Player}) {
         fix_dpi(canvas);
 
         console.log(`Starting animation. Version ${game.version}`);
+
         animationStateRef.current.version = game.version;
         animationRef.current = getAnimation(animationStateRef.current, game, player, canvas.width, canvas.height);
         if (animationFrameRequestRef.current !== null) {
@@ -84,6 +85,7 @@ export function GameCanvas({game, player}: {game: Game, player: Player}) {
             const animationDone = animationRef.current.next().done;
             if (animationDone) {
                 console.log(`Animation complete. Version ${animationStateRef.current.version}`);
+                animationComplete();
                 return;
             }
             paintCanvas(canvas!, images, animationStateRef.current, player);
@@ -92,7 +94,7 @@ export function GameCanvas({game, player}: {game: Game, player: Player}) {
 
         animationExecutor();
 
-    }, [game, imagesLoaded]);
+    });
 
     return (
         <canvas id="field" ref={canvasRef} />
@@ -121,6 +123,7 @@ function paintCanvas(canvas: HTMLCanvasElement, images: Images, animationState: 
 
     // draw field
     ctx.drawImage(images.field, 0, 0, canvas.width, canvas.height);
+
 
     // draw first down
     if (animationState.firstDown) {
@@ -306,6 +309,7 @@ function* getRspAnimation(animationState: AnimationState, game: Game, player: Pl
         };
     }
 
+    const homeIndex = 0, awayIndex = 1;
     animationState.rsp = (['home', 'away'] as Player[]).map(initRspObject);
     yield;
 
@@ -321,10 +325,8 @@ function* getRspAnimation(animationState: AnimationState, game: Game, player: Pl
         }
     }
 
-    // indexes are defined by the initial mapping
-    const homeIndex = 0, awayIndex = 1;
-    animationState.rsp[homeIndex].image = rspResult.home.toLowerCase() as RspImage;
-    animationState.rsp[awayIndex].image = rspResult.away.toLowerCase() as RspImage;
+    animationState.rsp[homeIndex]!.image = rspResult.home.toLowerCase() as RspImage;
+    animationState.rsp[awayIndex]!.image = rspResult.away.toLowerCase() as RspImage;
     yield;
 }
 
@@ -358,7 +360,7 @@ function* getDiceAnimation(animationState: AnimationState, game: Game, player: P
         yield;
     }
 
-    result.roll.forEach((die, index) => animationState.roll[index].face = die);
+    result.roll.forEach((die, index) => animationState.roll[index]!.face = die);
     yield;
 }
 
