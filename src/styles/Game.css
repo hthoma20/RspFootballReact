@@ -107,6 +107,25 @@
 
 .actionButton {
     margin: 5px;
+    color: black;
+}
+
+.actionButton.ENABLED {
+    --color: rgb(135, 113, 58);
+    border-color: var(--color);
+    background-color: var(--color);
+}
+
+.actionButton.DISABLED {
+    --color: rgb(83, 83, 83);
+    border-color: var(--color);
+    background-color: var(--color);
+}
+
+.actionButton.PRESSED {
+    --color: rgb(108, 122, 54);
+    border-color: var(--color);
+    background-color: var(--color);
 }
 
 .digitDisplay img {
