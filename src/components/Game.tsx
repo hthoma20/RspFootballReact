@@ -168,18 +168,21 @@ export function GameComponent({user, gameId}: {user: UserId, gameId: GameId}) {
     }
 
     const fieldGame: Game | null = animatingGame ?? displayedGame;
-    const actionPaneGame: Game | null = game;//gameRegistry.getCurrentGame();
     
     return (
         <div className="game" >
             <ScoreBoard game={displayedGame} />
             
-            <div id="middlePane">
-                <GameCanvas game={fieldGame} player={player} animationComplete={animationComplete} />
-                <ResultLog game={displayedGame} />
-            </div> 
-            <div id="actionPane" >
-                <ActionPane game={displayedGame} player={player} dispatchAction={dispatchGameAction} />
+            <div id="lowerPane">
+                <div id="leftPane">
+                    <GameCanvas game={fieldGame} player={player} animationComplete={animationComplete} />
+                    <div id="actionPane" >
+                        <ActionPane game={displayedGame} player={player} dispatchAction={dispatchGameAction} />
+                    </div>
+                </div>
+                <div id="rightPane">
+                    <ResultLog game={displayedGame} />
+                </div>
             </div>
         </div>
     );

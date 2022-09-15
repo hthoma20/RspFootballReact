@@ -15,14 +15,8 @@
     border-radius: 10px;
 }
 
-#actionPane {
-    height: 10%;
-    margin: auto;
-}
-
-#middlePane {
-    height: 60%;
-    
+#lowerPane {
+    height: 70%;
     display: flex;
 }
 
@@ -38,10 +32,21 @@
     margin: auto;
 }
 
+#leftPane {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+}
+
+#rightPane {
+    width: 30%;
+    display: flex;
+}
+
 #resultLog {
-    width: 20%;
-    height: 70%;
-    margin: auto;
+    width: 90%;
+    height: 90%;
+    /* margin: 6px; */
     padding-left: 10px;
 
     border-style: groove;
@@ -52,8 +57,13 @@
 }
 
 #field {
-    width: 70%;
-    height: 100%;
+    width: 100%;
+    height: 90%;
+    margin: auto;
+}
+
+#actionPane {
+    height: 10%;
     margin: auto;
 }
 
