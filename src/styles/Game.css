@@ -1,7 +1,25 @@
 
+body, html {
+    height: 100%;
+}
+
+body {
+
+    background-image: radial-gradient(
+        rgba(168, 130, 15, 0.8) 45%,
+        rgba(41, 23, 165, 0.8)
+    ), url("/public/background.jpg");
+
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
 .game {
     width: 70vw;
     height: 70vh;
+
+    background-color: aliceblue;
 
     display: flex;
     flex-direction: column;

@@ -14,7 +14,7 @@ import { Action } from "model/actionModel";
 import { getPlayer } from "util/players";
 import { ActionPane } from "./ActionPane";
 
-const POLL_ON = true;
+const POLL_ON = false;
 const ROBOT_ON = false;
 
 
