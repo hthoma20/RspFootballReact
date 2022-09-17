@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 
 import { postAction } from "api/actions";
 import { getGame, pollGame } from "api/games";
-import { getScoreImagePath } from "util/images";
 import { GameCanvas } from "./GameCanvas";
 import { ResultLog } from "./ResultLog";
 import * as Robot from 'bot/Robot';
@@ -13,8 +12,9 @@ import { Game, GameId, UserId } from "model/gameModel";
 import { Action } from "model/actionModel";
 import { getPlayer } from "util/players";
 import { ActionPane } from "./ActionPane";
+import { ScoreBanner } from "./ScoreBanner";
 
-const POLL_ON = false;
+const POLL_ON = true;
 const ROBOT_ON = false;
 
 
@@ -126,8 +126,6 @@ function useGameRegistry(game: Game | null): [GameRegistry, (dropVersion: number
     return [new GameRegistry(games, currentVersion), dropVersion];
 }
 
-
-
 export function GameComponent({user, gameId}: {user: UserId, gameId: GameId}) {
     const {game, dispatchGameAction} = useRemoteGame(gameId, user);
 
@@ -170,96 +168,23 @@ export function GameComponent({user, gameId}: {user: UserId, gameId: GameId}) {
     const fieldGame: Game | null = animatingGame ?? displayedGame;
     
     return (
-        <div className="game" >
-            <ScoreBoard game={displayedGame} />
-            
-            <div id="lowerPane">
-                <div id="leftPane">
+        <div id="game" >            
+            <div id="leftPane">
+                <div id="field">
                     <GameCanvas game={fieldGame} player={player} animationComplete={animationComplete} />
-                    <div id="actionPane" >
-                        <ActionPane game={displayedGame} player={player} dispatchAction={dispatchGameAction} />
-                    </div>
+                    <ScoreBanner game={displayedGame} />
                 </div>
-                <div id="rightPane">
-                    <ResultLog game={displayedGame} />
+                <div id="actionPane" >
+                    <ActionPane game={displayedGame} player={player} dispatchAction={dispatchGameAction} />
                 </div>
             </div>
-        </div>
-    );
-}
-
-function ScoreBoard({game}: {game: Game | null}) {
-
-    if (game === null) {
-        return <div id="scoreBoard" />;
-    }
-
-    // since plays 1-20 are in quarter 1, shift everything up 19 to line it up
-    const quarter = Math.floor((game.playCount + 19)/20);
-
-    return (
-        <div id="scoreBoard" >
-            <div id="homeScoreContainer">
-                <DoubleDigitDisplay id="homeScore" num={game.score.home} />
-                <ScoreLabel id="homeLabel" label="HOME" />
-            </div>
-            
-            <div id="homePenContainer">
-                <DigitDisplay id="homePenalties" digit={game.penalties.home} />
-                <ScoreLabel id="homePenaltiesLabel" label="PEN" />
-            </div>
-            
-            <div id="quarterContainer">
-                <DigitDisplay id="quarter" digit={quarter} />
-                <ScoreLabel id="quarterLabel" label="QTR" />
-            </div>
-
-            <div id="timeContainer">
-                <DoubleDigitDisplay id="timer" num={game.playCount} />
-                <ScoreLabel id="timerLabel" label="TIME" />
-            </div>
-
-            <div id="downContainer">
-                <DigitDisplay id="down" digit={game.down} />
-                <ScoreLabel id="downLabel" label="DOWN" />
-            </div>
-
-            <div id="awayPenContainer" >
-                <DigitDisplay id="awayPenalties" digit={game.penalties.away} />
-                <ScoreLabel id="awayPenaltiesLabel" label="PEN" />
-            </div>
-
-            <div id="awayScoreContainer">
-                <DoubleDigitDisplay id="awayScore" num={game.score.away} />
-                <ScoreLabel id="awayLabel" label="AWAY" />
+            <div id="rightPane">
+                <ResultLog game={displayedGame} />
             </div>
         </div>
     );
 }
 
-function DigitDisplay({digit, id}: {digit: number, id: string}) {
-        return <img className="digitDisplay"
-                src={getScoreImagePath(digit)}
-                alt={`${digit}`}
-                id={id} />;
-}
-
-function DoubleDigitDisplay({num, id}: {num: number, id: string}) {
-
-    const ones = num % 10;
-    const tens = Math.floor(num/10);
-
-    return (
-        <div id={id} className="digitDisplay doubleDigitDisplay">
-            <img src={getScoreImagePath(tens)} id={id} />
-            <img src={getScoreImagePath(ones)} id={id} />
-        </div>
-    );
-}
-
-function ScoreLabel({label, id}: {label: string, id: string}) {
-    return <div className="scoreLabel" id={id} >{label}</div>;
-}
 
 
 

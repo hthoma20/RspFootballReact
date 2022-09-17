@@ -1,10 +1,15 @@
 
+@font-face {
+    font-family: Armata-Regular;
+    src: url("/public/fonts/Armata-Regular.otf");
+}
+
+
 body, html {
     height: 100%;
 }
 
 body {
-
     background-image: radial-gradient(
         rgba(168, 130, 15, 0.8) 45%,
         rgba(41, 23, 165, 0.8)
@@ -15,14 +20,14 @@ body {
     background-size: cover;
 }
 
-.game {
+#game {
     width: 70vw;
     height: 70vh;
 
     background-color: aliceblue;
 
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
 
     margin: auto;
     margin-top: 10vh;
@@ -33,21 +38,41 @@ body {
     border-radius: 10px;
 }
 
-#lowerPane {
-    height: 70%;
-    display: flex;
+#field {
+    height: 90%;
+    position: relative;
 }
 
-#scoreBoard {
-    height: 30%;
-    
-    background-color: black;
 
-    display: flex;
-}
-
-#scoreBoard > * {
+#gameCanvas {
+    width: 100%;
+    height: 100%;
     margin: auto;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#scoreBanner {
+    background-color: rgb(243, 254, 201);
+    border: 1px solid rgb(163, 171, 132);
+
+    /* Position in parent */
+    height: 5%;
+    width: 70%;
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: auto;
+    bottom: 5px;
+    
+    /* Layout for children */
+    display: flex;
+    justify-content: center;
+
+    font-family: Armata-Regular;
+    text-transform: uppercase;
 }
 
 #leftPane {
@@ -64,7 +89,6 @@ body {
 #resultLog {
     width: 90%;
     height: 90%;
-    /* margin: 6px; */
     padding-left: 10px;
 
     border-style: groove;
@@ -74,63 +98,76 @@ body {
     overflow-y: scroll;
 }
 
-#field {
-    width: 100%;
-    height: 90%;
-    margin: auto;
-}
-
 #actionPane {
     height: 10%;
     margin: auto;
 }
 
+.scoreContainer {
+    /* Layout in parent */
+    flex-basis: 35%;
+
+    /* Layout of children */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.playerName {
+    margin-left: 10px;
+}
+
+.playerScore {
+    margin-right: 10px;
+    font-size: 160%;
+    font-weight: 700;
+}
+
+#awayScoreContainer {
+    background-color: rgb(128, 196, 207);
+    color: rgb(159, 54, 54);
+}
+
 #homeScoreContainer {
-    flex-basis: 12%;
-    margin-right: 0;
-    margin-left: 1%;
-}
-
-#homePenContainer {
-    flex-basis: 2%;
-    margin-left: 1%;
-}
-
-#quarterContainer {
-    flex-basis: 5%;
+    background-color: rgb(207, 41, 41);
+    color: rgb(241, 223, 74);
 }
 
 #timeContainer {
     flex-basis: 15%;
+
+    background-color: grey;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    font-size: 140%;
+}
+
+#quarterContainer {
+    margin-left: 5px;
+
+    display: flex;
+}
+
+.ordinalSuffix {
+    font-size: 50%;
+    align-self: baseline;
+}
+
+#clock {
+    margin-right: 5px;
 }
 
 #downContainer {
-    flex-basis: 5%;
-}
+    flex-basis: 15%;
 
-#awayPenContainer {
-    flex-basis: 2%;
-    margin-right: 1%;
-}
+    background-color: yellow;
 
-#awayScoreContainer {
-    flex-basis: 12%;
-    margin-left: 0;
-    margin-right: 1%;
-}
-
-
-.scoreLabel {
-    color: white;
-    margin: auto;
-    text-align: center;
-}
-
-.digitDisplay {
     display: flex;
+    align-items: center;
     justify-content: center;
-    max-height: 100%;
-    max-width: 100%;
 }
 
 .actionButton {
@@ -155,12 +192,3 @@ body {
     border-color: var(--color);
     background-color: var(--color);
 }
-
-.digitDisplay img {
-    max-width: 100%;
-}
-
-.doubleDigitDisplay img {
-    max-width: 50%;
-}
-

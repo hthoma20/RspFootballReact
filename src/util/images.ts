@@ -58,7 +58,3 @@ export function useImages<T extends string>(imagePaths: {[key in T]: string}):
 
     return [images, imagesLoaded];
 }
-
-export function getScoreImagePath(digit: number) {
-    return `score/${digit}.png`;
-}

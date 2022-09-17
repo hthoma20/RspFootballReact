@@ -97,7 +97,7 @@ export function GameCanvas({game, player, animationComplete}:
     });
 
     return (
-        <canvas id="field" ref={canvasRef} />
+        <canvas id="gameCanvas" ref={canvasRef} />
     );
 }
 
