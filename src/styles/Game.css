@@ -13,7 +13,7 @@ body {
     background-image: radial-gradient(
         rgba(168, 130, 15, 0.8) 45%,
         rgba(41, 23, 165, 0.8)
-    ), url("/public/background.jpg");
+    ), url("/public/images/background.jpg");
 
     background-position: center;
     background-repeat: no-repeat;

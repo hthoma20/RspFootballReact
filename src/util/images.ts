@@ -2,18 +2,21 @@ import { useEffect, useState } from "react";
 
 function getImage(path: string) {
     const image = new Image();
-    
-    image.src = path;
+    image.src = `images/${path}`;
     return image;
 }
 
 // return a promise that resolves when the image loads
 function imageOnloadPromise(image: HTMLImageElement) {
-    return new Promise<void>(resolve => {
+    return new Promise<void>((resolve, reject) => {
         image.onload = () => {
             console.log("Image loaded: ", image);
             resolve();
         };
+        image.onerror = () => {
+            console.error("Image not found at " + image.src);
+            reject();
+        }
     });
 }
 

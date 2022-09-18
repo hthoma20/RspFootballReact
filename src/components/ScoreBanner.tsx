@@ -29,7 +29,7 @@ function ScoreContainer({game, player}: {game: Game, player: Player}) {
 
     function PenaltyMarkers() {
         return (<div className="penalties">
-            {Array.from({length: penalties}, (_, i) => <div className="penaltyMarker" />)}
+            {Array.from({length: penalties}, (_, i) => <div key={i} className="penaltyMarker" />)}
         </div>);
     }
 

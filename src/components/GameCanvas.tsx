@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { useImage, useImages } from "util/images";
+import { useImages } from "util/images";
 
 import 'styles/Game.css';
 import { Game, Player } from "model/gameModel";
