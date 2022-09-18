@@ -111,6 +111,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative;
 }
 
 .playerName {
@@ -131,6 +132,28 @@ body {
 #homeScoreContainer {
     background-color: rgb(207, 41, 41);
     color: rgb(241, 223, 74);
+}
+
+.possession {
+    border: 2px solid white;
+}
+
+.penalties {
+    width: 40%;
+    height: 20%;
+    position: absolute;
+
+    left: 10px;
+    bottom: 1px;
+
+    display: flex;
+    justify-content: space-between;
+}
+
+.penaltyMarker {
+    background-color: yellow;
+    width: 45%;
+    height: 100%;
 }
 
 #timeContainer {
@@ -168,6 +191,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+#downSpacer {
+    margin-left: 3px;
+    margin-right: 3px;
 }
 
 .actionButton {
