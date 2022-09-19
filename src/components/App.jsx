@@ -16,7 +16,7 @@ function App() {
         clearUser();
     }
 
-    return <div>
+    return <div id="app">
         <NavigationBar
             user={user} logout={logout}
             gameId={gameId} exitGame={clearGameId} />

@@ -4,7 +4,6 @@
     src: url("/public/fonts/Armata-Regular.otf");
 }
 
-
 body, html {
     height: 100%;
 }
@@ -18,16 +17,25 @@ body {
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
+
+    font-family: Armata-Regular;
+    
+    overflow-y: hidden;
+}
+
+#root, #app {
+    width: 100%;
+    height: 100%;
 }
 
 #game {
-    width: 70vw;
-    height: 70vh;
+    width: 70%;
+    height: 70%;
 
     background-color: aliceblue;
 
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
 
     margin: auto;
     margin-top: 10vh;
@@ -71,31 +79,23 @@ body {
     display: flex;
     justify-content: center;
 
-    font-family: Armata-Regular;
     text-transform: uppercase;
 }
 
-#leftPane {
-    width: 70%;
-    display: flex;
-    flex-direction: column;
-}
-
-#rightPane {
-    width: 30%;
-    display: flex;
-}
-
 #resultLog {
-    width: 90%;
-    height: 90%;
+    position: absolute;
+    width: 40%;
+    height: 30%;
+    right: 10%;
+    top: 5%;
+
     padding-left: 10px;
+    padding-right: 10px;
 
-    border-style: groove;
-    border-width: 6px;
-    background-color: beige;
+    background-color: rgba(61, 63, 36, 0.8);
+    color: white;
 
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 #actionPane {
@@ -140,7 +140,7 @@ body {
 
 .penalties {
     width: 40%;
-    height: 20%;
+    height: 15%;
     position: absolute;
 
     left: 10px;

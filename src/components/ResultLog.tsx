@@ -41,9 +41,11 @@ export function ResultLog({game}: {game: Game | null}) {
     const renderedResults = resultLog.map((result, index) =>
         <ResultComponent user={"Player"} result={result} key={index} />);
 
-    return <div id="resultLog" ref={elementRef}>
-        {renderedResults}
-    </div>;
+    return (
+        <div id="resultLog" ref={elementRef}>
+            {renderedResults}
+        </div>
+    );
 
 }
 

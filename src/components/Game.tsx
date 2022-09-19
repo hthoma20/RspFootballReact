@@ -168,18 +168,14 @@ export function GameComponent({user, gameId}: {user: UserId, gameId: GameId}) {
     const fieldGame: Game | null = animatingGame ?? displayedGame;
     
     return (
-        <div id="game" >            
-            <div id="leftPane">
-                <div id="field">
-                    <GameCanvas game={fieldGame} player={player} animationComplete={animationComplete} />
-                    <ScoreBanner game={displayedGame} />
-                </div>
-                <div id="actionPane" >
-                    <ActionPane game={displayedGame} player={player} dispatchAction={dispatchGameAction} />
-                </div>
-            </div>
-            <div id="rightPane">
+        <div id="game">
+            <div id="field">
+                <GameCanvas game={fieldGame} player={player} animationComplete={animationComplete} />
+                <ScoreBanner game={displayedGame} />
                 <ResultLog game={displayedGame} />
+            </div>
+            <div id="actionPane">
+                <ActionPane game={displayedGame} player={player} dispatchAction={dispatchGameAction} />
             </div>
         </div>
     );
