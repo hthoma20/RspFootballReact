@@ -11,7 +11,7 @@ import { __DEV } from "util/devtools";
 import { Game, GameId, UserId } from "model/gameModel";
 import { Action } from "model/actionModel";
 import { getPlayer } from "util/players";
-import { ActionPane } from "./ActionPane";
+import { ActionComponent } from "./ActionComponent";
 import { ScoreBanner } from "./ScoreBanner";
 
 const POLL_ON = true;
@@ -173,9 +173,11 @@ export function GameComponent({user, gameId}: {user: UserId, gameId: GameId}) {
                 <GameCanvas game={fieldGame} player={player} animationComplete={animationComplete} />
                 <ScoreBanner game={displayedGame} />
                 <ResultLog game={displayedGame} />
-            </div>
-            <div id="actionPane">
-                <ActionPane game={displayedGame} player={player} dispatchAction={dispatchGameAction} />
+                <ActionComponent
+                    game={displayedGame}
+                    player={player}
+                    dispatchAction={dispatchGameAction}
+                    forceHidden={animatingGame !== null} />
             </div>
         </div>
     );

@@ -8,7 +8,36 @@ import { getOpponent } from "util/players";
 
 type ActionDispatch = (action: Action) => Promise<void>;
 
-export function ActionPane({game, player, dispatchAction}: {game: Game | null, player: Player, dispatchAction: ActionDispatch}) {
+type ActionPaneProps = {
+    dispatchAction: ActionDispatch;
+    game: Game;
+};
+
+type ActionComponentProps = {
+    game: Game | null;
+    player: Player;
+    dispatchAction: ActionDispatch;
+    // If true, hide the action pane, even if the given game has actions for this player
+    forceHidden: boolean;
+};
+
+export function ActionComponent({game, player, dispatchAction, forceHidden}: ActionComponentProps) {
+
+    if (game === null) {
+        return null;
+    }
+
+    // visible if there is any non-POLL action
+    const isVisible = forceHidden ? false : game.actions[player].some(action => action !== 'POLL');
+
+    return <div id="actionComponent" className={isVisible ? "visible" : "hidden"}>
+        <div id="actionPane">
+            <ActionPane game={game} player={player} dispatchAction={dispatchAction} />
+        </div>
+    </div>;
+}
+
+function ActionPane({game, player, dispatchAction}: ActionPaneProps & {player: Player}) {
     if (game === null) {
         return null;
     }
@@ -46,7 +75,6 @@ export function ActionPane({game, player, dispatchAction}: {game: Game | null, p
     return null;
 }
 
-type ActionPaneProps = {dispatchAction: ActionDispatch, game: Game};
 
 function RspPane({dispatchAction, game}: ActionPaneProps) {
     const dispatch = getChoiceActionDispatch(dispatchAction, 'RSP');

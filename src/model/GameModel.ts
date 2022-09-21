@@ -33,6 +33,6 @@ export type Game = {
     score: PlayerMap<number>;
     penalties: PlayerMap<number>;
 
-    actions: PlayerMap<ActionName>;
+    actions: PlayerMap<ActionName[]>;
     result: Result[];
 }
