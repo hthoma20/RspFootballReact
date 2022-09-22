@@ -1,12 +1,9 @@
-import React, { useState } from "react";
-
 import 'styles/Game.css';
 import { getDieCountChoices } from "util/actions";
-import { Action } from "model/actionModel";
-import { Game, GameId, Play, Player, UserId } from "model/gameModel";
+import { ActionDispatch } from "model/actionModel";
+import { Game, Play, Player } from "model/gameModel";
 import { getOpponent } from "util/players";
-
-type ActionDispatch = (action: Action) => Promise<void>;
+import { ActionButtonGroup } from "lib/ActionButton";
 
 type ActionPaneProps = {
     dispatchAction: ActionDispatch;
@@ -28,7 +25,8 @@ export function ActionComponent({game, player, dispatchAction, forceHidden}: Act
     }
 
     // visible if there is any non-POLL action
-    const isVisible = forceHidden ? false : game.actions[player].some(action => action !== 'POLL');
+    const irrelevantActions = ['POLL', 'RSP'];
+    const isVisible = forceHidden ? false : game.actions[player].some(action => !irrelevantActions.includes(action));
 
     return <div id="actionComponent" className={isVisible ? "visible" : "hidden"}>
         <div id="actionPane">
@@ -83,9 +81,9 @@ function RspPane({dispatchAction, game}: ActionPaneProps) {
         onClick={dispatch}
         gameVersion={game.version}
         buttons={[
-            {key: 'ROCK', children: 'Rock'},
-            {key: 'PAPER', children: 'Paper'},
-            {key: 'SCISSORS', children: 'Scissors'}
+            {actionKey: 'ROCK', className: 'actionButton', children: 'Rock'},
+            {actionKey: 'PAPER', className: 'actionButton', children: 'Paper'},
+            {actionKey: 'SCISSORS', className: 'actionButton', children: 'Scissors'}
         ]}
     />;
 }
@@ -97,8 +95,8 @@ function KickoffElectionPane({dispatchAction, game}: ActionPaneProps) {
         onClick={dispatch}
         gameVersion={game.version}
         buttons={[
-            {key: 'KICK', children: 'Kick'},
-            {key: 'RECIEVE', children: 'Recieve'}
+            {actionKey: 'KICK', className: 'actionButton', children: 'Kick'},
+            {actionKey: 'RECIEVE', className: 'actionButton', children: 'Recieve'}
         ]}
     />;
 }
@@ -110,8 +108,8 @@ function KickoffChoicePane({dispatchAction, game}: ActionPaneProps) {
         onClick={dispatch}
         gameVersion={game.version}
         buttons={[
-            {key: 'REGULAR', children: 'Regular'},
-            {key: 'ONSIDE', children: 'Onside'}
+            {actionKey: 'REGULAR', className: 'actionButton', children: 'Regular'},
+            {actionKey: 'ONSIDE', className: 'actionButton', children: 'Onside'}
         ]}
     />;
 }
@@ -123,8 +121,8 @@ function TouchbackChoicePane({dispatchAction, game}: ActionPaneProps) {
         onClick={dispatch}
         gameVersion={game.version}
         buttons={[
-            {key: 'TOUCHBACK', children: 'Touchback'},
-            {key: 'RETURN', children: 'Roll!'}
+            {actionKey: 'TOUCHBACK', className: 'actionButton', children: 'Touchback'},
+            {actionKey: 'RETURN', className: 'actionButton', children: 'Roll!'}
         ]}
     />;
 }
@@ -136,8 +134,8 @@ function RollAgainChoicePane({dispatchAction, game}: ActionPaneProps) {
         onClick={dispatch}
         gameVersion={game.version}
         buttons={[
-            {key: 'ROLL', children: 'Roll!'},
-            {key: 'HOLD', children: 'Hold'}
+            {actionKey: 'ROLL', className: 'actionButton', children: 'Roll!'},
+            {actionKey: 'HOLD', className: 'actionButton', children: 'Hold'}
         ]}
     />;
 }
@@ -152,7 +150,9 @@ function RollPane({dispatchAction, game}: ActionPaneProps) {
     }
     
     const rollButtons = getDieCountChoices(game).map(count => {return {
-        key: ''+count, children: `${count}`
+        actionKey: ''+count,
+        className: 'actionButton',
+        children: `${count}`
     }});
 
     return (
@@ -179,8 +179,8 @@ function CallPlayPane({dispatchAction, game}: ActionPaneProps) {
         onClick={onClick}
         gameVersion={game.version}
         buttons={[
-            {key: 'SHORT_RUN', children: 'Short Run'},
-            {key: 'LONG_RUN', children: 'Long Run'}
+            {actionKey: 'SHORT_RUN', className: 'actionButton',  children: 'Short Run'},
+            {actionKey: 'LONG_RUN', className: 'actionButton', children: 'Long Run'}
         ]}
     />;
 }
@@ -192,8 +192,8 @@ function PatPane({dispatchAction, game}: ActionPaneProps) {
         onClick={dispatch}
         gameVersion={game.version}
         buttons={[
-            {key: 'ONE_POINT', children: 'One Point'},
-            {key: 'TWO_POINT', children: 'Two Point'}
+            {actionKey: 'ONE_POINT', className: 'actionButton', children: 'One Point'},
+            {actionKey: 'TWO_POINT', className: 'actionButton', children: 'Two Point'}
         ]}
     />;
 }
@@ -205,75 +205,4 @@ function getChoiceActionDispatch(dispatchAction: ActionDispatch, choiceName: str
             choice: choice
         })
     }
-}
-
-type ActionButtonProps<K extends string> = {
-    // A unique key for this button.
-    key: K;
-    // The Components to place in the button
-    children: React.ReactNode;
-};
-
-/**
- * Display a group of buttons. These buttons can only be pressed once per game version.
- * If a new game version is given, the buttons re-validate.
- */
-function ActionButtonGroup<K extends string>({buttons, onClick, gameVersion}:
-    {buttons: ActionButtonProps<K>[], onClick: (key: K) => void, gameVersion: number}) {
-
-    // TODO: in the case where RspChoice -> RspChoice, the buttons never re-enable
-    
-    // the key of the button which was pressed
-    const [pressedButton, setPressedButton] = useState<K | null>(null);
-    // the game version when the button was pressed
-    const [pressedVersion, setPressedVersion] = useState<number | null>(null);
-
-    if (pressedVersion !== null && pressedVersion !== gameVersion) {
-        setPressedButton(null);
-        setPressedVersion(null);
-    }
-
-    function getButtonState(key: K): ActionButtonState {
-        if (pressedButton === null) {
-            return 'ENABLED';
-        }
-        if (pressedButton === key) {
-            return 'PRESSED';
-        }
-        return 'DISABLED';
-    }
-
-    function onClickFacade(key: K) {
-        if (getButtonState(key) === 'ENABLED') {
-            onClick(key);
-            setPressedButton(key);
-            setPressedVersion(gameVersion);
-        }
-    }
-
-    const buttonComponents = buttons.map(buttonProps =>
-        <ActionButton key={buttonProps.key}
-            onClick={() => onClickFacade(buttonProps.key)}
-            state={getButtonState(buttonProps.key)}>
-            
-            {buttonProps.children}
-        
-        </ActionButton>);
-    
-    return <div className='actionButtonGroup'>
-        {buttonComponents}
-    </div>;
-}
-
-type ActionButtonState = 'ENABLED' | 'DISABLED' | 'PRESSED';
-
-function ActionButton(props: {state: ActionButtonState, onClick: () => void, children: React.ReactNode}) {
-    
-    const className = `actionButton ${props.state}`;
-    
-    return (
-        <button className={className} onClick={props.onClick} disabled={props.state !== 'ENABLED'}>
-            {props.children}
-        </button>
-    );
 }

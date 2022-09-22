@@ -230,17 +230,6 @@ body {
     margin-top: 10%;
 }
 
-
-@keyframes slidein {
-    from {
-        /* bottom: -45%; */
-        height: 0;
-    }
-    to {
-        height: 45%;
-    }
-}
-
 .actionButton {
     margin: 5px;
     color: black;
@@ -262,4 +251,64 @@ body {
     --color: rgb(108, 122, 54);
     border-color: var(--color);
     background-color: var(--color);
+}
+
+
+#rspActionComponent {
+    position: absolute;
+    top: 40%;
+    left: 20%;
+    width: 20%;
+    height: 20%;
+
+    animation: fadeIn 1s;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.rspAction {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-color: transparent;
+    border: none;
+}
+
+.rspAction.ENABLED:hover, .rspAction.PRESSED {
+    border-style: solid;
+    border-width: 20%;
+    border-radius: 100%;
+    border-color:rgba(41, 23, 165, 0.8);
+}
+
+.rspAction.rock {
+    background-image: url("/public/images/rock.png");
+
+    top: 0;
+    left: 25%;
+}
+
+.rspAction.scissors {
+    background-image: url("/public/images/scissors.png");
+
+    top: 50%;
+    left: 0;
+}
+
+.rspAction.paper {
+    background-image: url("/public/images/paper.png");
+
+    top: 50%;
+    left: 50%;
 }

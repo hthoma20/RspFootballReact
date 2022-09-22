@@ -13,6 +13,7 @@ import { Action } from "model/actionModel";
 import { getPlayer } from "util/players";
 import { ActionComponent } from "./ActionComponent";
 import { ScoreBanner } from "./ScoreBanner";
+import { RspActionComponent } from "./RspAction";
 
 const POLL_ON = true;
 const ROBOT_ON = false;
@@ -178,6 +179,7 @@ export function GameComponent({user, gameId}: {user: UserId, gameId: GameId}) {
                     player={player}
                     dispatchAction={dispatchGameAction}
                     forceHidden={animatingGame !== null} />
+                <RspActionComponent game={displayedGame} player={player} dispatchAction={dispatchGameAction} />
             </div>
         </div>
     );

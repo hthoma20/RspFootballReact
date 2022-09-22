@@ -292,7 +292,7 @@ function* getRspAnimation(animationState: AnimationState, game: Game, player: Pl
     // draw RSP
     const rspResult = getResult(game, 'RSP');
 
-    if (!rspResult) {
+    if (!rspResult || game.actions[player].includes('RSP')) {
         animationState.rsp = [];
         return;
     }
