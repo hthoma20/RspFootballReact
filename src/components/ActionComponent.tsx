@@ -4,6 +4,8 @@ import { ActionDispatch } from "model/actionModel";
 import { Game, Play, Player } from "model/gameModel";
 import { getOpponent } from "util/players";
 import { ActionButtonGroup } from "lib/ActionButton";
+import { useState } from 'react';
+import { getLocalizedString } from 'util/localization';
 
 type ActionPaneProps = {
     dispatchAction: ActionDispatch;
@@ -25,7 +27,7 @@ export function ActionComponent({game, player, dispatchAction, forceHidden}: Act
     }
 
     // visible if there is any non-POLL action
-    const irrelevantActions = ['POLL', 'RSP'];
+    const irrelevantActions = ['POLL', 'RSP', 'PENALTY'];
     const isVisible = forceHidden ? false : game.actions[player].some(action => !irrelevantActions.includes(action));
 
     return <div id="actionComponent" className={isVisible ? "visible" : "hidden"}>
@@ -42,9 +44,6 @@ function ActionPane({game, player, dispatchAction}: ActionPaneProps & {player: P
 
     const actions = game.actions[player];
 
-    if (actions.includes('RSP')) {
-        return <RspPane dispatchAction={dispatchAction} game={game} />;
-    }
     if (actions.includes('KICKOFF_ELECTION')) {
         return <KickoffElectionPane dispatchAction={dispatchAction} game={game} />
     }
@@ -66,10 +65,7 @@ function ActionPane({game, player, dispatchAction}: ActionPaneProps & {player: P
     if (actions.includes('PAT_CHOICE')) {
         return <PatPane dispatchAction={dispatchAction} game={game} />;
     }
-    if (actions.includes('POLL')) {
-        const opponentAction = game.actions[getOpponent(player)];
-        return <div>Waiting for opponent: {opponentAction}</div>
-    }
+
     return null;
 }
 
@@ -168,6 +164,8 @@ function RollPane({dispatchAction, game}: ActionPaneProps) {
 
 function CallPlayPane({dispatchAction, game}: ActionPaneProps) {
 
+    const [describedPlay, setDescribedPlay] = useState<Play | null>(null);
+
     function onClick(play: Play) {
         dispatchAction({
             name: 'CALL_PLAY',
@@ -175,14 +173,50 @@ function CallPlayPane({dispatchAction, game}: ActionPaneProps) {
         });
     }
 
-    return <ActionButtonGroup
-        onClick={onClick}
-        gameVersion={game.version}
-        buttons={[
-            {actionKey: 'SHORT_RUN', className: 'actionButton',  children: 'Short Run'},
-            {actionKey: 'LONG_RUN', className: 'actionButton', children: 'Long Run'}
-        ]}
-    />;
+    function onHover(play: Play) {
+        setDescribedPlay(play);
+    }
+
+    return <>
+        <div className="actionPaneButtons">
+            <ActionButtonGroup
+                onClick={onClick}
+                onHover={onHover}
+                gameVersion={game.version}
+                buttons={[
+                    {actionKey: 'SHORT_RUN', className: 'actionButton',  children: 'Short Run'},
+                    {actionKey: 'LONG_RUN', className: 'actionButton', children: 'Long Run'}
+                ]}
+            />
+        </div>
+        <PlayDescription play={describedPlay} />
+    </>;
+}
+
+function PlayDescription({play}: {play: Play | null}) {
+    if (play === null) {
+        return null;
+    }
+
+    const prettyPlay = play.split('_').join(' ');
+
+    return <div className="playDescription">
+        <div className="playDescriptionPlay">{prettyPlay}</div>
+        <div className="playDescriptionTable">
+            <div className="playDescriptionColumn win">
+                <div className="playDescriptionHeader">Win</div>
+                <div className="playDescriptionContent">{getLocalizedString(play+"_WIN" as any)}</div>
+            </div>
+            <div className="playDescriptionColumn tie">
+                <div className="playDescriptionHeader">Tie</div>
+                <div className="playDescriptionContent">{getLocalizedString(play+"_TIE" as any)}</div>
+            </div>
+            <div className="playDescriptionColumn loss">
+                <div className="playDescriptionHeader">Lose</div>
+                <div className="playDescriptionContent">{getLocalizedString(play+"_LOSS" as any)}</div>
+            </div>
+        </div>
+    </div>;
 }
 
 function PatPane({dispatchAction, game}: ActionPaneProps) {

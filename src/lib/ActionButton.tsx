@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 
-type ActionButtonProps<K extends string> = {
+type ActionButtonDefinition<K extends string> = {
     // A unique key for this button.
     actionKey: K;
     // The Components to place in the button
@@ -10,12 +10,19 @@ type ActionButtonProps<K extends string> = {
     className?: string;
 };
 
+type ActionButtonGroupProps<K extends string> = {
+    buttons: ActionButtonDefinition<K>[];
+    onClick: (actionKey: K) => void;
+    // A function to be called when an ENABLED button is hovered over
+    onHover?: (actionKey: K) => void;
+    gameVersion: number;
+};
+
 /**
  * Display a group of buttons. These buttons can only be pressed once per game version.
  * If a new game version is given, the buttons re-validate.
  */
-export function ActionButtonGroup<K extends string>({buttons, onClick, gameVersion}:
-    {buttons: ActionButtonProps<K>[], onClick: (key: K) => void, gameVersion: number}) {
+export function ActionButtonGroup<K extends string>({buttons, gameVersion, onClick, onHover}: ActionButtonGroupProps<K>) {
     
     // the key of the button which was pressed
     const [pressedButton, setPressedButton] = useState<K | null>(null);
@@ -37,11 +44,17 @@ export function ActionButtonGroup<K extends string>({buttons, onClick, gameVersi
         return 'DISABLED';
     }
 
-    function onClickFacade(key: K) {
-        if (getButtonState(key) === 'ENABLED') {
-            onClick(key);
-            setPressedButton(key);
+    function onClickFacade(actionKey: K) {
+        if (getButtonState(actionKey) === 'ENABLED') {
+            onClick(actionKey);
+            setPressedButton(actionKey);
             setPressedVersion(gameVersion);
+        }
+    }
+
+    function onHoverFacade(actionKey: K) {
+        if (onHover && getButtonState(actionKey) === 'ENABLED') {
+            onHover(actionKey);
         }
     }
 
@@ -50,6 +63,7 @@ export function ActionButtonGroup<K extends string>({buttons, onClick, gameVersi
             key={buttonProps.actionKey}
             className={buttonProps.className}
             onClick={() => onClickFacade(buttonProps.actionKey)}
+            onHover={() => onHoverFacade(buttonProps.actionKey)}
             state={getButtonState(buttonProps.actionKey)}>
             
             {buttonProps.children}
@@ -61,13 +75,25 @@ export function ActionButtonGroup<K extends string>({buttons, onClick, gameVersi
 
 type ActionButtonState = 'ENABLED' | 'DISABLED' | 'PRESSED';
 
-function ActionButton(props:
-    {className?: string, state: ActionButtonState, onClick: () => void, children: React.ReactNode}) {
+type ActionButtonProps = {
+    className?: string;
+    state: ActionButtonState;
+    onClick: () => void;
+    onHover: () => void;
+    children: React.ReactNode
+}
+
+function ActionButton(props: ActionButtonProps) {
     
     const className = props.className ? `${props.className} ${props.state}` : props.state;
 
     return (
-        <button className={className} onClick={props.onClick} disabled={props.state !== 'ENABLED'}>
+        <button
+            className={className}
+            onClick={props.onClick}
+            onMouseEnter={props.onHover}
+            disabled={props.state !== 'ENABLED'}>
+
             {props.children}
         </button>
     );
