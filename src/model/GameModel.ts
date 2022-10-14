@@ -9,7 +9,7 @@ export type Play = string;
 
 export type Player = 'home' | 'away';
 
-type PlayerMap<T> = {[key in Player]: T};
+export type PlayerMap<T> = {[key in Player]: T};
 
 
 export type Game = {

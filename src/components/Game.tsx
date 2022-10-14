@@ -173,7 +173,7 @@ export function GameComponent({user, gameId}: {user: UserId, gameId: GameId}) {
             <div id="field">
                 <GameCanvas game={fieldGame} player={player} animationComplete={animationComplete} />
                 <ScoreBanner game={displayedGame} />
-                <ResultLog game={displayedGame} />
+                <ResultLog game={displayedGame} player={player} />
                 <ActionComponent
                     game={displayedGame}
                     player={player}

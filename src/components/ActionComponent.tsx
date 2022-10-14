@@ -2,7 +2,6 @@ import 'styles/Game.css';
 import { getDieCountChoices } from "util/actions";
 import { ActionDispatch } from "model/actionModel";
 import { Game, Play, Player } from "model/gameModel";
-import { getOpponent } from "util/players";
 import { ActionButtonGroup } from "lib/ActionButton";
 import { useState } from 'react';
 import { getLocalizedString } from 'util/localization';
