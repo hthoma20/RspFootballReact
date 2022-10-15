@@ -2,7 +2,9 @@ import { useEffect } from "react";
 import { useRef, useState } from "react";
 
 import { Game, Player, PlayerMap, UserId } from "model/gameModel";
-import { ComputedResult, ComputedRollResult, ComputedRspResult, computeResults } from "mappers/result";
+import { ComputedCallPlayResult, ComputedResult, ComputedRollResult, ComputedRspResult, computeResults } from "mappers/result";
+import { stringify } from "querystring";
+import { workerData } from "worker_threads";
 
 
 /**
@@ -27,8 +29,8 @@ export function ResultLog({game, player}: {game: Game | null, player: Player}) {
         }
     });
     
-    if (game !== null && game.version > version && game.result.length > 0) {
-        const computedResults = computeResults(game)
+    if (game !== null && game.version > version) {
+        const computedResults = computeResults(game);
         setResultLog([...resultLog, ...computedResults]);
         setVersion(game.version);
         setShouldScroll(true);
@@ -63,6 +65,8 @@ function ResultComponent({player, players, result}: ResultProps) {
             return <RollResultComponent player={player} players={players} result={result} />;
         case 'RSP':
             return <RspResultComponent player={player} result={result} />;
+        case 'CALL_PLAY':
+            return <CallPlayResultComponent player={player} players={players} result={result} />;
     }
     console.error(`Unrecognized result ${result}`);
     return null;
@@ -76,7 +80,7 @@ function RollResultComponent({player, players, result}: ResultProps & {result: C
     const roll = result.roll.join('-');
     const article = result.roll.length == 1 ? "a" : "";
 
-    const roller = result.player == player ? 'You' : players[result.player];
+    const roller = getUserString(player, result.player, players);
 
     return <div>{roller} rolled {article} {roll}</div>;
 }
@@ -95,4 +99,22 @@ function RspResultComponent({player, result}: {player: Player, result: ComputedR
     }
 
     return <div>{log}</div>;
+}
+
+function CallPlayResultComponent({player, players, result}: ResultProps & {result: ComputedCallPlayResult}) {
+
+    const caller = getUserString(player, result.player, players);
+
+    const prettyPlay = upperCaseWords(result.play.replaceAll('_', ' '));
+
+    return <div>{caller} called {prettyPlay}</div>;
+}
+
+function upperCaseWords(str: string) {
+    return str.split(' ').map(word =>
+        word[0]?.toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+}
+
+function getUserString(player: Player, actingPlayer: Player, players: PlayerMap<UserId>) {
+    return actingPlayer === player ? 'You' : players[actingPlayer];
 }
