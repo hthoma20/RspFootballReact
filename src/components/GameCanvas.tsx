@@ -218,9 +218,6 @@ function getInitialAnimationState(): AnimationState {
 function* getAnimation(animationState: AnimationState, game: Game, player: Player,
     canvasWidth: number, canvasHeight: number): Animation {
 
-    getCurrentPlayFrame(animationState, game, player, canvasWidth, canvasHeight);
-    yield;
-
     for (let frame of getRspAnimation(animationState, game, player, canvasWidth, canvasHeight)) {
         yield;
     }
@@ -256,36 +253,6 @@ function getGameOverFrame(animationState: AnimationState, game: Game, player: Pl
     }
 }
 
-function getCurrentPlayFrame(animationState: AnimationState, game: Game, player: Player,
-    canvasWidth: number, canvasHeight: number) {
-
-    if (game.state == 'FUMBLE') {
-        animationState.text.currentPlay = {
-            text: "Fumble!",
-            x: canvasWidth/2,
-            y: canvasHeight/4,
-            size: canvasHeight/4
-        };
-        return;
-    }
-
-    if (!game.play) {
-        delete animationState.text.currentPlay;
-        return;
-    }
-
-    function upperFirstLetter(word: string) {
-        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    }
-
-    const text = game.play.split('_').map(upperFirstLetter).join(' ');
-    animationState.text.currentPlay = {
-        text: text,
-        x: canvasWidth/2,
-        y: canvasHeight/4,
-        size: canvasHeight/4
-    };
-}
 
 function* getRspAnimation(animationState: AnimationState, game: Game, player: Player,
     canvasWidth: number, canvasHeight: number): Animation {

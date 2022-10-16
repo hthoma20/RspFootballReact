@@ -112,7 +112,7 @@ function CallPlayResultComponent({player, players, result}: ResultProps & {resul
 
 function upperCaseWords(str: string) {
     return str.split(' ').map(word =>
-        word[0]?.toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
 }
 
 function getUserString(player: Player, actingPlayer: Player, players: PlayerMap<UserId>) {
