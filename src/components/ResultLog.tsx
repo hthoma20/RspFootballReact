@@ -2,9 +2,7 @@ import { useEffect } from "react";
 import { useRef, useState } from "react";
 
 import { Game, Player, PlayerMap, UserId } from "model/gameModel";
-import { ComputedCallPlayResult, ComputedResult, ComputedRollResult, ComputedRspResult, computeResults } from "mappers/result";
-import { stringify } from "querystring";
-import { workerData } from "worker_threads";
+import { ComputedCallPlayResult, ComputedFumbleResult, ComputedResult, ComputedRollResult, ComputedRspResult, computeResults } from "mappers/result";
 
 
 /**
@@ -59,7 +57,7 @@ type ResultProps = {
     result: ComputedResult
 };
 
-function ResultComponent({player, players, result}: ResultProps) {
+function ResultComponent({player, players, result}: ResultProps): JSX.Element {
     switch(result.name) {
         case 'ROLL':
             return <RollResultComponent player={player} players={players} result={result} />;
@@ -67,9 +65,9 @@ function ResultComponent({player, players, result}: ResultProps) {
             return <RspResultComponent player={player} result={result} />;
         case 'CALL_PLAY':
             return <CallPlayResultComponent player={player} players={players} result={result} />;
+        case 'FUMBLE':
+            return <FumbleResultComponent player={player} players={players} result={result} />;
     }
-    console.error(`Unrecognized result ${result}`);
-    return null;
 }
 
 function RollResultComponent({player, players, result}: ResultProps & {result: ComputedRollResult}) {
@@ -108,6 +106,11 @@ function CallPlayResultComponent({player, players, result}: ResultProps & {resul
     const prettyPlay = upperCaseWords(result.play.replaceAll('_', ' '));
 
     return <div>{caller} called {prettyPlay}</div>;
+}
+
+function FumbleResultComponent({player, players, result}: ResultProps & {result: ComputedFumbleResult}) {
+    const fumbler = getUserString(player, result.player, players);
+    return <div>{fumbler} fumbled!</div>;
 }
 
 function upperCaseWords(str: string) {

@@ -21,7 +21,12 @@ export type ComputedCallPlayResult = {
     play: Play;
 }
 
-export type ComputedResult = ComputedRollResult | ComputedRspResult | ComputedCallPlayResult;
+export type ComputedFumbleResult = {
+    name: 'FUMBLE';
+    player: Player;
+}
+
+export type ComputedResult = ComputedRollResult | ComputedRspResult | ComputedCallPlayResult | ComputedFumbleResult;
 export type ComputedResultName = ComputedResult['name'];
 
 export function computeResults(game: Game): ComputedResult[] {
@@ -48,13 +53,13 @@ function mapStoredResults(game: Game): ComputedResult[] {
 }
 
 function computeAdditionalResults(game: Game): ComputedResult[] {
-    const results: (ComputedResult | null)[] = [computePlayCallResult(game)];
+    const results: (ComputedResult | null)[] = [
+        computePlayCallResult(game), computeFumbleResult(game)];
     return results.filter(result => result !== null) as ComputedResult[];
 }
 
 function computePlayCallResult(game: Game): ComputedCallPlayResult | null {
     const playCallStates = ['SHORT_RUN', 'LONG_RUN'];
-    console.log(game);
 
     if (playCallStates.includes(game.state) &&
         game.play !== null &&
@@ -67,6 +72,15 @@ function computePlayCallResult(game: Game): ComputedCallPlayResult | null {
         };
     }
 
-    console.log("returning null", game);
+    return null;
+}
+
+function computeFumbleResult(game: Game): ComputedFumbleResult | null {
+    if (game.state === 'FUMBLE' && game.possession) {
+        return {
+            name: 'FUMBLE',
+            player: game.possession
+        };
+    }
     return null;
 }
