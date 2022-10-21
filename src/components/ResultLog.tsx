@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useRef, useState } from "react";
 
-import { Game, Player, PlayerMap, UserId } from "model/gameModel";
+import { Game, Player, PlayerMap } from "model/rspModel";
 import { ComputedCallPlayResult, ComputedFumbleResult, ComputedResult, ComputedRollResult, ComputedRspResult, computeResults } from "mappers/result";
 
 
@@ -34,7 +34,10 @@ export function ResultLog({game, player}: {game: Game | null, player: Player}) {
         setShouldScroll(true);
     }
 
-    const players = game ? game.players : {'home': '', 'away': ''};
+    const players = {
+        home: game && game.players.home ? game.players.home : '',
+        away: game && game.players.away ? game.players.away : ''
+    };
 
     // Note that the index is used as a key. This is safe since results are never removed, and
     // new results are always added to the back of the list, so the indices are stable
@@ -53,7 +56,7 @@ export function ResultLog({game, player}: {game: Game | null, player: Player}) {
 
 type ResultProps = {
     player: Player,
-    players: PlayerMap<UserId>,
+    players: PlayerMap<string>,
     result: ComputedResult
 };
 
@@ -118,6 +121,6 @@ function upperCaseWords(str: string) {
         word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
 }
 
-function getUserString(player: Player, actingPlayer: Player, players: PlayerMap<UserId>) {
+function getUserString(player: Player, actingPlayer: Player, players: PlayerMap<string>) {
     return actingPlayer === player ? 'You' : players[actingPlayer];
 }

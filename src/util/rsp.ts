@@ -1,4 +1,4 @@
-import { RspChoice } from "model/choiceModel";
+import { RspChoice } from "model/rspModel";
 
 const RSP_BEATS = {
     ROCK: 'SCISSORS',

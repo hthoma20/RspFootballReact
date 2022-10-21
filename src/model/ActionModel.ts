@@ -1,5 +1,3 @@
-export type ActionName = string;
-
-export type Action = any;
+import { Action } from "./rspModel";
 
 export type ActionDispatch = (action: Action) => Promise<void>;

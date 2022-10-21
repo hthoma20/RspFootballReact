@@ -1,7 +1,6 @@
-import { Game, Player } from "model/gameModel";
 import { ActionDispatch } from "model/actionModel";
 import { ActionButtonGroup } from "lib/ActionButton";
-import { RspChoice } from "model/choiceModel";
+import { Game, Player, RspChoice } from "model/rspModel";
 
 
 export function RspActionComponent({game, player, dispatchAction}:

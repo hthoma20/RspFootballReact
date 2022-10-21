@@ -1,4 +1,4 @@
-import { Game } from "model/gameModel";
+import { Game } from "model/rspModel";
 
 export function getDieCountChoices(game: Game) {
     switch (game.state) {
@@ -11,7 +11,7 @@ export function getDieCountChoices(game: Game) {
         case 'SACK_ROLL':
         case 'KICK_RETURN_6':
         case 'LONG_RUN_ROLL':
-            return [1];
+            return [1];                
     }
 
     return [];

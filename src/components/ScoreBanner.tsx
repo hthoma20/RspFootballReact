@@ -1,4 +1,4 @@
-import { Game, Player } from "model/gameModel";
+import { Game, Player } from "model/rspModel";
 
 export function ScoreBanner({game}: {game: Game | null}) {
 

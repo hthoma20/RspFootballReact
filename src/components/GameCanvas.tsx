@@ -3,8 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useImages } from "util/images";
 
 import 'styles/Game.css';
-import { Game, Player } from "model/gameModel";
-import { Result, ResultName } from "model/resultModel";
+import { Game, Player, Result } from "model/rspModel";
 
 type RspImage = 'fistLeft' | 'fistRight' | 'rock' | 'paper' | 'scissors';
 type Die = {face: number, x: number, y: number, dx: number, dy: number};
@@ -468,7 +467,7 @@ function* getParallelAnimation(animations: Animation[]): Animation {
 
 // return a result of the given name
 // null if not present
-function getResult<ResultT extends ResultName>(game: Game, resultName: ResultT) {
+function getResult<ResultT extends Result['name']>(game: Game, resultName: ResultT) {
     type ResultType = Extract<Result, {name: ResultT}>; // this picks the type that matches the given result name
     const matchingResult = game.result.find(result => result.name === resultName) as ResultType | undefined;
     return matchingResult ? matchingResult : null;

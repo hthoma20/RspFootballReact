@@ -8,8 +8,7 @@ import * as Robot from 'bot/Robot';
 
 import 'styles/Game.css';
 import { __DEV } from "util/devtools";
-import { Game, GameId, UserId } from "model/gameModel";
-import { Action } from "model/actionModel";
+import { Action, Game } from "model/rspModel";
 import { getPlayer } from "util/players";
 import { ActionComponent } from "./ActionComponent";
 import { ScoreBanner } from "./ScoreBanner";
@@ -28,7 +27,7 @@ const ROBOT_ON = false;
  * dispatchAction: a function which accepts an action, and sends that action to the
  *                  remote game 
  */
-function useRemoteGame(gameId: GameId, user: UserId) {
+function useRemoteGame(gameId: string, user: string) {
     const [game, setGameDelegate] = useState<Game | null>(null);
 
     function setGame(game: Game) {
@@ -127,7 +126,7 @@ function useGameRegistry(game: Game | null): [GameRegistry, (dropVersion: number
     return [new GameRegistry(games, currentVersion), dropVersion];
 }
 
-export function GameComponent({user, gameId}: {user: UserId, gameId: GameId}) {
+export function GameComponent({user, gameId}: {user: string, gameId: string}) {
     const {game, dispatchGameAction} = useRemoteGame(gameId, user);
 
     const [animationQueue, dequeueGameVersion] = useGameRegistry(game);

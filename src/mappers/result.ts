@@ -1,5 +1,4 @@
-import { Game, Play, Player } from "model/gameModel";
-import { Result } from "model/resultModel";
+import { Game, Play, Player, Result } from "model/rspModel";
 import { getRspWinner } from "util/rsp";
 
 

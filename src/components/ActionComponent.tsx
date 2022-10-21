@@ -1,7 +1,7 @@
 import 'styles/Game.css';
 import { getDieCountChoices } from "util/actions";
 import { ActionDispatch } from "model/actionModel";
-import { Game, Play, Player } from "model/gameModel";
+import { Action, Game, Play, Player } from "model/rspModel";
 import { ActionButtonGroup } from "lib/ActionButton";
 import { useState } from 'react';
 import { getLocalizedString } from 'util/localization';
@@ -140,7 +140,7 @@ function RollPane({dispatchAction, game}: ActionPaneProps) {
     function dispatchRollAction(count: string) {
         dispatchAction({
             name: 'ROLL',
-            count: count
+            count: +count
         });
     }
     
@@ -231,11 +231,16 @@ function PatPane({dispatchAction, game}: ActionPaneProps) {
     />;
 }
 
-function getChoiceActionDispatch(dispatchAction: ActionDispatch, choiceName: string) {
-    return (choice: string) => {
+type ChoiceAction = Extract<Action, {'choice': string}>;
+function getChoiceActionDispatch<ChoiceName extends ChoiceAction['name']>
+    (dispatchAction: ActionDispatch, choiceName: ChoiceName) {
+    
+    type ChosenAction = Extract<ChoiceAction, {'name': ChoiceName}>;
+    
+    return (choice: ChosenAction['choice']) => {
         dispatchAction({
             name: choiceName,
-            choice: choice
+            choice: choice as any
         })
     }
 }

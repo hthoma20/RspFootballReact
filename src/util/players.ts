@@ -1,7 +1,7 @@
-import { Game, Player, UserId } from "model/gameModel";
+import { Game, Player } from "model/rspModel";
 
 
-export function getPlayer(game: Game, user: UserId): Player {
+export function getPlayer(game: Game, user: string): Player {
     return game.players.home == user ? 'home' : 'away';
 }
 

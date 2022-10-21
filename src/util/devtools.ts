@@ -1,4 +1,4 @@
-import { Game } from "model/gameModel";
+import { Game } from "model/rspModel";
 
 export const __DEV = {
     currentGame: null as (Game | null),
