@@ -184,7 +184,8 @@ function CallPlayPane({dispatchAction, game}: ActionPaneProps) {
                 gameVersion={game.version}
                 buttons={[
                     {actionKey: 'SHORT_RUN', className: 'actionButton',  children: 'Short Run'},
-                    {actionKey: 'LONG_RUN', className: 'actionButton', children: 'Long Run'}
+                    {actionKey: 'LONG_RUN', className: 'actionButton', children: 'Long Run'},
+                    {actionKey: 'SHORT_PASS', className: 'actionButton', children: 'Short Pass'}
                 ]}
             />
         </div>

@@ -1,17 +1,17 @@
-import { Game, Play, Player, Result } from "model/rspModel";
+import { GainResult, Game, Play, Player, Result, RollResult, SafetyResult } from "model/rspModel";
 import { getRspWinner } from "util/rsp";
 
-
-
-export type ComputedRollResult = {
-    name: 'ROLL'
+export type ComputedRollResult = RollResult & {
     player: Player;
-    roll: number[];
-};
+}
 
 export type ComputedRspResult = {
     name: 'RSP';
     winner: Player | null;
+}
+
+export type ComputedGainResult = GainResult & {
+    player: Player;
 }
 
 export type ComputedCallPlayResult = {
@@ -25,8 +25,13 @@ export type ComputedFumbleResult = {
     player: Player;
 }
 
-export type ComputedResult = ComputedRollResult | ComputedRspResult | ComputedCallPlayResult | ComputedFumbleResult;
-export type ComputedResultName = ComputedResult['name'];
+export type ComputedResult =
+    ComputedRollResult
+    | ComputedRspResult
+    | ComputedCallPlayResult
+    | ComputedFumbleResult
+    | SafetyResult
+    | GainResult;
 
 export function computeResults(game: Game): ComputedResult[] {
     return [...mapStoredResults(game), ...computeAdditionalResults(game)];
@@ -46,8 +51,11 @@ function mapStoredResults(game: Game): ComputedResult[] {
                     name: 'RSP',
                     winner: getRspWinner(result)
                 }
+            case 'SAFETY':
+                return result;
+            case 'GAIN':
+                return result;
         }
-        return {name: 'RSP', winner: 'home'};
     });
 }
 

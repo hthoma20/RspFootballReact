@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useRef, useState } from "react";
 
-import { Game, Player, PlayerMap } from "model/rspModel";
+import { GainResult, Game, Player, PlayerMap, SafetyResult } from "model/rspModel";
 import { ComputedCallPlayResult, ComputedFumbleResult, ComputedResult, ComputedRollResult, ComputedRspResult, computeResults } from "mappers/result";
 
 
@@ -70,6 +70,10 @@ function ResultComponent({player, players, result}: ResultProps): JSX.Element {
             return <CallPlayResultComponent player={player} players={players} result={result} />;
         case 'FUMBLE':
             return <FumbleResultComponent player={player} players={players} result={result} />;
+        case 'GAIN':
+            return <GainResultComponent player={player} players={players} result={result} />;
+        case 'SAFETY':
+            return <SafetyResultComponent player={player} players={players} result={result} />;
     }
 }
 
@@ -114,6 +118,14 @@ function CallPlayResultComponent({player, players, result}: ResultProps & {resul
 function FumbleResultComponent({player, players, result}: ResultProps & {result: ComputedFumbleResult}) {
     const fumbler = getUserString(player, result.player, players);
     return <div>{fumbler} fumbled!</div>;
+}
+
+function GainResultComponent({player, players, result}: ResultProps & {result: GainResult}) {
+    return <div>{result.yards} yard gain</div>;
+}
+
+function SafetyResultComponent({player, players, result}: ResultProps & {result: SafetyResult}) {
+    return <div>Safety!</div>;
 }
 
 function upperCaseWords(str: string) {
