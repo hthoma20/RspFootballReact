@@ -90,7 +90,14 @@ export type GainResult = {
     yards: number;
 };
 
-export type Result = RspResult | RollResult | SafetyResult | GainResult;
+export type LossResult = {
+    name: 'LOSS';
+    play: Play;
+    player: Player;
+    yards: number;
+};
+
+export type Result = RspResult | RollResult | SafetyResult | GainResult | LossResult;
 
 export type Game = {
     gameId: string;

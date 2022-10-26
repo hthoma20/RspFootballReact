@@ -55,6 +55,9 @@ function ActionPane({game, player, dispatchAction}: ActionPaneProps & {player: P
     if (actions.includes('ROLL_AGAIN_CHOICE')) {
         return <RollAgainChoicePane dispatchAction={dispatchAction} game={game} />;
     }
+    if (actions.includes('SACK_CHOICE')) {
+        return <SackChoicePane dispatchAction={dispatchAction} game={game} />
+    }
     if (actions.includes('ROLL')) {
         return <RollPane dispatchAction={dispatchAction} game={game} />;
     }
@@ -66,21 +69,6 @@ function ActionPane({game, player, dispatchAction}: ActionPaneProps & {player: P
     }
 
     return null;
-}
-
-
-function RspPane({dispatchAction, game}: ActionPaneProps) {
-    const dispatch = getChoiceActionDispatch(dispatchAction, 'RSP');
-
-    return <ActionButtonGroup
-        onClick={dispatch}
-        gameVersion={game.version}
-        buttons={[
-            {actionKey: 'ROCK', className: 'actionButton', children: 'Rock'},
-            {actionKey: 'PAPER', className: 'actionButton', children: 'Paper'},
-            {actionKey: 'SCISSORS', className: 'actionButton', children: 'Scissors'}
-        ]}
-    />;
 }
 
 function KickoffElectionPane({dispatchAction, game}: ActionPaneProps) {
@@ -131,6 +119,19 @@ function RollAgainChoicePane({dispatchAction, game}: ActionPaneProps) {
         buttons={[
             {actionKey: 'ROLL', className: 'actionButton', children: 'Roll!'},
             {actionKey: 'HOLD', className: 'actionButton', children: 'Hold'}
+        ]}
+    />;
+}
+
+function SackChoicePane({dispatchAction, game}: ActionPaneProps) {
+    const dispatch = getChoiceActionDispatch(dispatchAction, 'SACK_CHOICE');
+
+    return <ActionButtonGroup
+        onClick={dispatch}
+        gameVersion={game.version}
+        buttons={[
+            {actionKey: 'SACK', className: 'actionButton', children: 'Sack'},
+            {actionKey: 'PICK', className: 'actionButton', children: 'Attempt interception'}
         ]}
     />;
 }

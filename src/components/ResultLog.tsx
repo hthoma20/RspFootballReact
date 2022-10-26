@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useRef, useState } from "react";
 
-import { GainResult, Game, Player, PlayerMap, SafetyResult } from "model/rspModel";
+import { GainResult, Game, LossResult, Player, PlayerMap, SafetyResult } from "model/rspModel";
 import { ComputedCallPlayResult, ComputedFumbleResult, ComputedResult, ComputedRollResult, ComputedRspResult, computeResults } from "mappers/result";
 
 
@@ -72,6 +72,8 @@ function ResultComponent({player, players, result}: ResultProps): JSX.Element {
             return <FumbleResultComponent player={player} players={players} result={result} />;
         case 'GAIN':
             return <GainResultComponent player={player} players={players} result={result} />;
+        case 'LOSS':
+            return <LossResultComponent player={player} players={players} result={result} />;
         case 'SAFETY':
             return <SafetyResultComponent player={player} players={players} result={result} />;
     }
@@ -122,6 +124,10 @@ function FumbleResultComponent({player, players, result}: ResultProps & {result:
 
 function GainResultComponent({player, players, result}: ResultProps & {result: GainResult}) {
     return <div>{result.yards} yard gain</div>;
+}
+
+function LossResultComponent({player, players, result}: ResultProps & {result: LossResult}) {
+    return <div>{result.yards} yard loss</div>;
 }
 
 function SafetyResultComponent({player, players, result}: ResultProps & {result: SafetyResult}) {
