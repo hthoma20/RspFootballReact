@@ -1,4 +1,4 @@
-import { GainResult, Game, LossResult, Play, Player, Result, RollResult, SafetyResult } from "model/rspModel";
+import { GainResult, Game, isPlay, LossResult, OutOfBoundsPassResult, Play, Player, RollResult, SafetyResult, TouchbackResult, TurnoverResult } from "model/rspModel";
 import { getRspWinner } from "util/rsp";
 
 export type ComputedRollResult = RollResult & {
@@ -28,11 +28,14 @@ export type ComputedFumbleResult = {
 export type ComputedResult =
     ComputedRollResult
     | ComputedRspResult
-    | ComputedCallPlayResult
-    | ComputedFumbleResult
     | SafetyResult
     | GainResult
-    | LossResult;
+    | LossResult
+    | TurnoverResult
+    | OutOfBoundsPassResult
+    | TouchbackResult
+    | ComputedCallPlayResult
+    | ComputedFumbleResult;
 
 export function computeResults(game: Game): ComputedResult[] {
     return [...mapStoredResults(game), ...computeAdditionalResults(game)];
@@ -53,10 +56,11 @@ function mapStoredResults(game: Game): ComputedResult[] {
                     winner: getRspWinner(result)
                 }
             case 'SAFETY':
-                return result;
             case 'GAIN':
-                return result;
             case 'LOSS':
+            case 'TURNOVER':
+            case 'OOB_PASS':
+            case 'TOUCHBACK':
                 return result;
         }
     });
@@ -69,9 +73,13 @@ function computeAdditionalResults(game: Game): ComputedResult[] {
 }
 
 function computePlayCallResult(game: Game): ComputedCallPlayResult | null {
-    const playCallStates = ['SHORT_RUN', 'LONG_RUN'];
+    // the name of the state following a PLAY_CALL is alway named the same as the play itself
+    const wasPlayCalled = isPlay(game.state);
 
-    if (playCallStates.includes(game.state) &&
+    // the first time we enter this state, the rsp will always be empty
+    const isInitialRspState = game.rsp.home === null && game.rsp.away === null;
+
+    if (wasPlayCalled && isInitialRspState &&
         game.play !== null &&
         game.possession !== null) {
         

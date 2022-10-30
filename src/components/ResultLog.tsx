@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { useRef, useState } from "react";
 
-import { GainResult, Game, LossResult, Player, PlayerMap, SafetyResult } from "model/rspModel";
+import { GainResult, Game, LossResult, OutOfBoundsPassResult, Player, PlayerMap, SafetyResult, TouchbackResult, TurnoverResult } from "model/rspModel";
 import { ComputedCallPlayResult, ComputedFumbleResult, ComputedResult, ComputedRollResult, ComputedRspResult, computeResults } from "mappers/result";
+import { getLocalizedString } from "util/localization";
 
 
 /**
@@ -76,6 +77,12 @@ function ResultComponent({player, players, result}: ResultProps): JSX.Element {
             return <LossResultComponent player={player} players={players} result={result} />;
         case 'SAFETY':
             return <SafetyResultComponent player={player} players={players} result={result} />;
+        case 'TURNOVER':
+            return <TurnoverResultComponent player={player} players={players} result={result} />;
+        case 'OOB_PASS':
+            return <OutOfBoundsPassResultComponent player={player} players={players} result={result} />;
+        case 'TOUCHBACK':
+            return <TouchbackResultComponent player={player} players={players} result={result} />;
     }
 }
 
@@ -132,6 +139,19 @@ function LossResultComponent({player, players, result}: ResultProps & {result: L
 
 function SafetyResultComponent({player, players, result}: ResultProps & {result: SafetyResult}) {
     return <div>Safety!</div>;
+}
+
+function TurnoverResultComponent({player, players, result}: ResultProps & {result: TurnoverResult}) {
+    const localizationKey: any = `TURNOVER_RESULT_${result.type}`;
+    return <div>{getLocalizedString(localizationKey)}</div>;
+}
+
+function OutOfBoundsPassResultComponent({player, players, result}: ResultProps & {result: OutOfBoundsPassResult}) {
+    return <div>{getLocalizedString('OUT_OF_BOUNDS_PASS')}</div>
+}
+
+function TouchbackResultComponent({player, players, result}: ResultProps & {result: TouchbackResult}) {
+    return <div>{getLocalizedString('TOUCHBACK')}</div>
 }
 
 function upperCaseWords(str: string) {
