@@ -6,13 +6,13 @@ export function isPlayer(value: string): value is Player {
     return _PlayerValues.includes(value as any);
 }
 
-const _StateValues = ['COIN_TOSS', 'KICKOFF_ELECTION', 'KICKOFF_CHOICE', 'KICKOFF', 'ONSIDE_KICK', 'TOUCHBACK_CHOICE', 'KICK_RETURN', 'KICK_RETURN_1', 'KICK_RETURN_6', 'FUMBLE', 'PAT_CHOICE', 'EXTRA_POINT', 'EXTRA_POINT_2', 'PLAY_CALL', 'SHORT_RUN', 'SHORT_RUN_CONT', 'LONG_RUN', 'LONG_RUN_ROLL', 'SHORT_PASS', 'SHORT_PASS_CONT', 'LONG_PASS', 'LONG_PASS_ROLL', 'SACK_CHOICE', 'SACK_ROLL', 'PICK_ROLL', 'DISTANCE_ROLL', 'PICK_TOUCHBACK_CHOICE', 'PICK_RETURN', 'PICK_RETURN_6', 'GAME_OVER'] as const;
+const _StateValues = ['COIN_TOSS', 'KICKOFF_ELECTION', 'KICKOFF_CHOICE', 'KICKOFF', 'ONSIDE_KICK', 'TOUCHBACK_CHOICE', 'KICK_RETURN', 'KICK_RETURN_1', 'KICK_RETURN_6', 'FUMBLE', 'PAT_CHOICE', 'EXTRA_POINT', 'EXTRA_POINT_2', 'PLAY_CALL', 'SHORT_RUN', 'SHORT_RUN_CONT', 'LONG_RUN', 'LONG_RUN_ROLL', 'SHORT_PASS', 'SHORT_PASS_CONT', 'LONG_PASS', 'LONG_PASS_ROLL', 'BOMB', 'BOMB_ROLL', 'BOMB_CHOICE', 'SACK_CHOICE', 'SACK_ROLL', 'PICK_ROLL', 'DISTANCE_ROLL', 'PICK_TOUCHBACK_CHOICE', 'PICK_RETURN', 'PICK_RETURN_6', 'GAME_OVER'] as const;
 export type State = typeof _StateValues[number];
 export function isState(value: string): value is State {
     return _StateValues.includes(value as any);
 }
 
-const _PlayValues = ['SHORT_RUN', 'LONG_RUN', 'SHORT_PASS', 'LONG_PASS'] as const;
+const _PlayValues = ['SHORT_RUN', 'LONG_RUN', 'SHORT_PASS', 'LONG_PASS', 'BOMB'] as const;
 export type Play = typeof _PlayValues[number];
 export function isPlay(value: string): value is Play {
     return _PlayValues.includes(value as any);

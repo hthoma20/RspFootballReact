@@ -11,6 +11,9 @@ export default {
     LONG_PASS_WIN: "10 yards plus the roll of the die",
     LONG_PASS_TIE: "No Gain",
     LONG_PASS_LOSS: "10 yard loss - or - defense rolls die,\n1-4: incomplete pass\n5-6: interception",
+    BOMB_WIN: "35 yard gain minimum. Roll up to 3 dice, one at a time; for completion total must be odd.",
+    BOMB_TIE: "No Gain",
+    BOMB_LOSS: "15 yard loss - or - defense rolls die,\n1,3,5: incomplete pass\n2,4,6: interception",
 
     TURNOVER_RESULT_DOWNS: "Turnover on downs",
     TURNOVER_RESULT_FUMBLE: "Fumble recovered. Turnover!",

@@ -12,6 +12,7 @@ export function getDieCountChoices(game: Game) {
         case 'KICK_RETURN_6':
         case 'LONG_RUN_ROLL':
         case 'LONG_PASS_ROLL':
+        case 'BOMB_ROLL':
         case 'PICK_ROLL':
         case 'PICK_RETURN':
         case 'PICK_RETURN_6':
@@ -20,6 +21,8 @@ export function getDieCountChoices(game: Game) {
             switch (game.play) {
                 case 'LONG_PASS':
                     return [1];
+                case 'BOMB':
+                    return [3];
             }
             return [];
     }

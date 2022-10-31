@@ -310,7 +310,7 @@ function* getDiceAnimation(animationState: AnimationState, game: Game, player: P
     const initX = 0, initY = 0, initDx = canvasWidth/100, initDy = 0;
     const offset = yardsToPixels(6, canvasWidth);
 
-    animationState.roll = result.roll.map((die, index) => {
+    animationState.roll = game.roll.map((die, index) => {
         return {
             face: getRandomDieFace(),
             x: initX + offset*index,
@@ -322,11 +322,21 @@ function* getDiceAnimation(animationState: AnimationState, game: Game, player: P
 
     const floorY = (3/4) * canvasHeight, acceleration = 0.4, damping = 0.5, threshold = 0.5;
     const animations = animationState.roll.map(die => getDieAnimation(die, floorY, acceleration, damping, threshold));
-    for (let frame of getParallelAnimation(animations)) {
+
+    // All dice at or after this index should be animated
+    const animateIndex = game.roll.length - result.roll.length;
+
+    // complete the animations for the static "already rolled dice", without yielding
+    for (let frame of getParallelAnimation(animations.slice(0, animateIndex))) {}
+    for (let i = 0; i < animateIndex; i++) {
+        animationState.roll[i]!.face = game.roll[i]!;
+    }
+
+    for (let frame of getParallelAnimation(animations.slice(animateIndex))) {
         yield;
     }
 
-    result.roll.forEach((die, index) => animationState.roll[index]!.face = die);
+    game.roll.forEach((die, index) => animationState.roll[index]!.face = die);
     yield;
 }
 
