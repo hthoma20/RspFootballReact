@@ -7,7 +7,10 @@ export default {
     LONG_RUN_LOSS: "Defense rolls.\n1-5: 5 yard loss\n6: 10 yard loss",
     SHORT_PASS_WIN: "10 yard gain. Continue to RSP.",
     SHORT_PASS_TIE: "No Gain",
-    SHORT_PASS_LOSS: "5 yard loss - or - defense rolls die,\n1-4: incomplete pass\n5-6: interception",
+    SHORT_PASS_LOSS: "5 yard loss - or - defense rolls die,\n1-5: incomplete pass\n6: interception",
+    LONG_PASS_WIN: "10 yards plus the roll of the die",
+    LONG_PASS_TIE: "No Gain",
+    LONG_PASS_LOSS: "10 yard loss - or - defense rolls die,\n1-4: incomplete pass\n5-6: interception",
 
     TURNOVER_RESULT_DOWNS: "Turnover on downs",
     TURNOVER_RESULT_FUMBLE: "Fumble recovered. Turnover!",
