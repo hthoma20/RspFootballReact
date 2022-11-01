@@ -113,6 +113,12 @@ export function isTurnoverType(value: string): value is TurnoverType {
     return _TurnoverTypeValues.includes(value as any);
 }
 
+const _ScoreTypeValues = ['TOUCHDOWN', 'FIELD_GOAL', 'SAFETY', 'PAT_1', 'PAT_2'] as const;
+export type ScoreType = typeof _ScoreTypeValues[number];
+export function isScoreType(value: string): value is ScoreType {
+    return _ScoreTypeValues.includes(value as any);
+}
+
 export type RspResult = {
     name: 'RSP';
     home: RspChoice;
@@ -125,8 +131,9 @@ export type RollResult = {
     roll: number[];
 };
 
-export type SafetyResult = {
-    name: 'SAFETY';
+export type ScoreResult = {
+    name: 'SCORE';
+    type: ScoreType;
 };
 
 export type GainResult = {
@@ -152,11 +159,24 @@ export type OutOfBoundsPassResult = {
     name: 'OOB_PASS';
 };
 
+export type OutOfBoundsKickResult = {
+    name: 'OOB_KICK';
+};
+
 export type TouchbackResult = {
     name: 'TOUCHBACK';
 };
 
-export type Result = RspResult | RollResult | SafetyResult | GainResult | LossResult | TurnoverResult | OutOfBoundsPassResult | TouchbackResult;
+export type IncompletePassResult = {
+    name: 'INCOMPLETE';
+};
+
+export type KickoffElectionResult = {
+    name: 'KICK_ELECTION';
+    choice: KickoffElectionChoice;
+};
+
+export type Result = RspResult | RollResult | ScoreResult | GainResult | LossResult | TurnoverResult | OutOfBoundsPassResult | OutOfBoundsKickResult | TouchbackResult | IncompletePassResult | KickoffElectionResult;
 
 export type Game = {
     gameId: string;

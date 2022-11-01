@@ -382,8 +382,10 @@ function* getBallAnimation(animationState: AnimationState, game: Game, player: P
         yield;
         return;
     }
+
+    const scoreResult = getResult(game, 'SCORE');
     
-    const isSafety = !!getResult(game, 'SAFETY');
+    const isSafety = scoreResult && scoreResult.type == 'SAFETY';
     if (isSafety) {
         const safetyBallPos = yardLineToPixels(-5, canvasWidth, game, player);
         for (let ballpos of getTween(animationState.ballpos, safetyBallPos)) {

@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useRef, useState } from "react";
 
-import { GainResult, Game, LossResult, OutOfBoundsPassResult, Player, PlayerMap, SafetyResult, TouchbackResult, TurnoverResult } from "model/rspModel";
-import { ComputedCallPlayResult, ComputedFumbleResult, ComputedResult, ComputedRollResult, ComputedRspResult, computeResults } from "mappers/result";
+import { GainResult, Game, IncompletePassResult, LossResult, OutOfBoundsKickResult, OutOfBoundsPassResult, Player, PlayerMap, TouchbackResult, TurnoverResult } from "model/rspModel";
+import { ComputedCallPlayResult, ComputedFumbleResult, ComputedKickoffElectionResult, ComputedOnsideKickResult, ComputedResult, ComputedRollResult, ComputedRspResult, ComputedScoreResult, computeResults } from "mappers/result";
 import { getLocalizedString } from "util/localization";
 
 
@@ -75,14 +75,22 @@ function ResultComponent({player, players, result}: ResultProps): JSX.Element {
             return <GainResultComponent player={player} players={players} result={result} />;
         case 'LOSS':
             return <LossResultComponent player={player} players={players} result={result} />;
-        case 'SAFETY':
-            return <SafetyResultComponent player={player} players={players} result={result} />;
+        case 'SCORE':
+            return <ScoreResultComponent player={player} players={players} result={result} />;
         case 'TURNOVER':
             return <TurnoverResultComponent player={player} players={players} result={result} />;
         case 'OOB_PASS':
             return <OutOfBoundsPassResultComponent player={player} players={players} result={result} />;
+        case 'OOB_KICK':
+            return <OutOfBoundsKickResultComponent player={player} players={players} result={result} />;
+        case 'INCOMPLETE':
+            return <IncompletePassResultComponent player={player} players={players} result={result} />;
         case 'TOUCHBACK':
             return <TouchbackResultComponent player={player} players={players} result={result} />;
+        case 'ONSIDE':
+            return <OnsideKickResultComponent player={player} players={players} result={result} />;
+        case 'KICK_ELECTION':
+            return <KickElectionResultComponent player={player} players={players} result={result} />;
     }
 }
 
@@ -137,8 +145,9 @@ function LossResultComponent({player, players, result}: ResultProps & {result: L
     return <div>{result.yards} yard loss</div>;
 }
 
-function SafetyResultComponent({player, players, result}: ResultProps & {result: SafetyResult}) {
-    return <div>Safety!</div>;
+function ScoreResultComponent({player, players, result}: ResultProps & {result: ComputedScoreResult}) {
+    const localizationKey: any = `SCORE_${result.type}`
+    return <div>{getLocalizedString(localizationKey)}</div>;
 }
 
 function TurnoverResultComponent({player, players, result}: ResultProps & {result: TurnoverResult}) {
@@ -150,8 +159,27 @@ function OutOfBoundsPassResultComponent({player, players, result}: ResultProps &
     return <div>{getLocalizedString('OUT_OF_BOUNDS_PASS')}</div>
 }
 
+function OutOfBoundsKickResultComponent({player, players, result}: ResultProps & {result: OutOfBoundsKickResult}) {
+    return <div>{getLocalizedString('OUT_OF_BOUNDS_KICK')}</div>
+}
+
+function IncompletePassResultComponent({player, players, result}: ResultProps & {result: IncompletePassResult}) {
+    return <div>{getLocalizedString('INCOMPLETE_PASS')}</div>
+}
+
 function TouchbackResultComponent({player, players, result}: ResultProps & {result: TouchbackResult}) {
     return <div>{getLocalizedString('TOUCHBACK')}</div>
+}
+
+function OnsideKickResultComponent({player, players, result}: ResultProps & {result: ComputedOnsideKickResult}) {
+    return <div>{getLocalizedString('ONSIDE_KICK')}</div>
+}
+
+function KickElectionResultComponent({player, players, result}: ResultProps & {result: ComputedKickoffElectionResult}) {
+    const user = getUserString(player, result.player, players);
+    const choice = result.choice.toLowerCase();
+    const string = `${user} elected to ${choice}`;
+    return <div>{string}</div>
 }
 
 function upperCaseWords(str: string) {

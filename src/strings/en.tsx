@@ -16,8 +16,17 @@ export default {
     BOMB_LOSS: "15 yard loss - or - defense rolls die,\n1,3,5: incomplete pass\n2,4,6: interception",
 
     TURNOVER_RESULT_DOWNS: "Turnover on downs",
-    TURNOVER_RESULT_FUMBLE: "Fumble recovered. Turnover!",
+    TURNOVER_RESULT_FUMBLE: "Fumble recovered by defense. Turnover!",
     TURNOVER_RESULT_PICK: "Interception!",
     OUT_OF_BOUNDS_PASS: "Throw out of bounds. Incomplete.",
-    TOUCHBACK: "Touchback"
+    OUT_OF_BOUNDS_KICK: "Kick out of bounds.",
+    INCOMPLETE_PASS: "Incomplete",
+    TOUCHBACK: "Touchback",
+    ONSIDE_KICK: "Onside kick!",
+    SCORE_TOUCHDOWN: "Touchdown!",
+    SCORE_FIELD_GOAL: "Field Goal!",
+
+    SCORE_PAT_1: "Extra point is good!",
+    SCORE_PAT_2: "Two point conversion!",
+    SCORE_SAFETY: "Safety!",
 };
