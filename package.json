@@ -20,6 +20,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "deploy": "scp -r build/* pi@10.0.0.2:RspFootball/web",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

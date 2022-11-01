@@ -336,7 +336,6 @@ body {
 
 .rspAction.ENABLED:hover, .rspAction.PRESSED {
     border-style: solid;
-    border-width: 20%;
     border-radius: 100%;
     border-color:rgba(41, 23, 165, 0.8);
 }
