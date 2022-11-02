@@ -55,7 +55,7 @@ function getOrdinalSuffix(ord: number) {
 function TimeContainer({game}: {game: Game}) {
     // since plays 1-20 are in quarter 1, shift everything up 19 to line it up
     const quarter = Math.floor((game.playCount + 19)/20);
-    const playsRemaining = 21 - game.playCount % 20;
+    const playsRemaining = (20*quarter) + 1 - game.playCount;
 
     return (
         <div id="timeContainer">
