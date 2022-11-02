@@ -4,12 +4,13 @@ import { useImages } from "util/images";
 
 import 'styles/Game.css';
 import { Game, Player, Result } from "model/rspModel";
+import { getOpponent } from "util/players";
 
 type RspImage = 'fistLeft' | 'fistRight' | 'rock' | 'paper' | 'scissors';
 type Die = {face: number, x: number, y: number, dx: number, dy: number};
 type AnimationState = {
     version: number;
-    rsp: {x: number, y: number, image: RspImage}[];
+    rsp: {[key in string]: {x: number, y: number, image: RspImage}};
     roll: Die[];
     text: {[key in string]: {x?: number, y?: number, size?: number, text: string}};
     firstDown: number | null;
@@ -161,7 +162,7 @@ function paintCanvas(canvas: HTMLCanvasElement, images: Images, animationState: 
     }
     
     // draw RSP
-    for (let rsp of animationState.rsp) {
+    for (let rsp of Object.values(animationState.rsp)) {
         const image = images[rsp.image];
         const size = ballWidth*2;
         ctx.drawImage(image, rsp.x - size/2, rsp.y - size/2, size, size);
@@ -199,7 +200,7 @@ function drawDie(ctx: CanvasRenderingContext2D, image: CanvasImageSource, sideLe
 function getInitialAnimationState(): AnimationState {
     return {
         version: -1,
-        rsp: [],
+        rsp: {},
         roll: [],
         text: {},
         ballpos: null,
@@ -259,24 +260,40 @@ function* getRspAnimation(animationState: AnimationState, game: Game, player: Pl
     const rspResult = getResult(game, 'RSP');
 
     if (!rspResult) {
-        animationState.rsp = [];
+        animationState.rsp = {};
         return;
     }
 
-    function initRspObject(rspPlayer: Player) {
-        const isLeft = player == rspPlayer;
-        const fieldPos = isLeft ? 40 : 60;
-        const image: 'fistLeft' | 'fistRight' = isLeft ? 'fistLeft' : 'fistRight';
-
-        return {
-            image: image,
-            x: yardLineToPixels(fieldPos, canvasWidth),
-            y: canvasHeight/2
-        };
+    if (!game.possession) {
+        console.error("RSP result, but no offense. This is an unexpected state. Assuming home is offense");
+    }
+    const offense = game.possession || 'home';
+    const defense = getOpponent(offense);
+    const offenseFistPos = yardLineToPixels(40, canvasWidth, game, player);
+    const defenseFistPos = yardLineToPixels(60, canvasWidth, game, player);
+    let offenseFist: 'fistLeft' | 'fistRight', defenseFist: 'fistLeft' | 'fistRight';
+    if (offenseFistPos < defenseFistPos) {
+        offenseFist = 'fistLeft';
+        defenseFist = 'fistRight';
+    }
+    else {
+        offenseFist = 'fistRight';
+        defenseFist = 'fistLeft';
     }
 
-    const homeIndex = 0, awayIndex = 1;
-    animationState.rsp = (['home', 'away'] as Player[]).map(initRspObject);
+    const fistY = canvasHeight/2;
+    animationState.rsp = {
+        'offense': {
+            image: offenseFist,
+            x: offenseFistPos,
+            y: fistY
+        },
+        'defense': {
+            image: defenseFist,
+            x: defenseFistPos,
+            y: fistY
+        }
+    };
     yield;
 
     const bounceFrames = 20;
@@ -284,15 +301,15 @@ function* getRspAnimation(animationState: AnimationState, game: Game, player: Pl
     for (let bounce = 0; bounce < 3; bounce++) {
         for (let frame = 0; frame < bounceFrames; frame++) {
             const delta = frame < bounceFrames/2 ? pixelsPerFrame : -pixelsPerFrame;
-            for (let rsp of animationState.rsp) {
+            for (let rsp of Object.values(animationState.rsp)) {
                 rsp.y += delta;
             }
             yield;
         }
     }
 
-    animationState.rsp[homeIndex]!.image = rspResult.home.toLowerCase() as RspImage;
-    animationState.rsp[awayIndex]!.image = rspResult.away.toLowerCase() as RspImage;
+    animationState.rsp['offense']!.image = rspResult[offense].toLowerCase() as RspImage;
+    animationState.rsp['defense']!.image = rspResult[defense].toLowerCase() as RspImage;
     yield;
 }
 
