@@ -109,8 +109,8 @@ function mapStoredResults(game: Game): MappedResult[] {
 }
 
 function computeAdditionalResults(game: Game): AdditionalResult[] {
-    const results: (ComputedResult | null)[] = [
-        computePlayCallResult(game), computeFumbleResult(game)];
+    const results: (AdditionalResult | null)[] = [
+        computePlayCallResult(game), computeFumbleResult(game), computeOnsideKickResult(game)];
     return results.filter(result => result !== null) as AdditionalResult[];
 }
 
@@ -142,6 +142,16 @@ function computeFumbleResult(game: Game): ComputedFumbleResult | null {
         return {
             name: 'FUMBLE',
             player: game.possession
+        };
+    }
+    return null;
+}
+
+function computeOnsideKickResult(game: Game): ComputedOnsideKickResult | null {
+    if (game.state == 'ONSIDE_KICK') {
+        return {
+            name: 'ONSIDE',
+            player: game.possession!
         };
     }
     return null;
