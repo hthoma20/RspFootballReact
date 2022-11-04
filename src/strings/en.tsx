@@ -14,6 +14,9 @@ export default {
     BOMB_WIN: "35 yard gain minimum. Roll up to 3 dice, one at a time; for completion total must be odd.",
     BOMB_TIE: "No Gain",
     BOMB_LOSS: "15 yard loss - or - defense rolls die,\n1,3,5: incomplete pass\n2,4,6: interception",
+    PUNT_WIN: "Roll up to 3 dice for punt - or - one die for fake punt attempt from 10 yards back",
+    PUNT_TIE: "Roll up to 3 dice for punt",
+    PUNT_LOSS: "Defense rolls.\n1: Punt is blocked\n2-5: Offense punts",
 
     TURNOVER_RESULT_DOWNS: "Turnover on downs",
     TURNOVER_RESULT_FUMBLE: "Fumble recovered by defense. Turnover!",
@@ -29,4 +32,8 @@ export default {
     SCORE_PAT_1: "Extra point is good!",
     SCORE_PAT_2: "Two point conversion!",
     SCORE_SAFETY: "Safety!",
+
+    FAKE_KICK: "Fake kick!",
+    COFFIN_CORNER: "Coffin corner kick! No return",
+    BLOCKED_KICK: "Kick blocked! Recovered by defense",
 };

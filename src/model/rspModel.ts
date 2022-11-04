@@ -6,13 +6,13 @@ export function isPlayer(value: string): value is Player {
     return _PlayerValues.includes(value as any);
 }
 
-const _StateValues = ['COIN_TOSS', 'KICKOFF_ELECTION', 'KICKOFF_CHOICE', 'KICKOFF', 'ONSIDE_KICK', 'TOUCHBACK_CHOICE', 'KICK_RETURN', 'KICK_RETURN_1', 'KICK_RETURN_6', 'FUMBLE', 'PAT_CHOICE', 'EXTRA_POINT', 'EXTRA_POINT_2', 'PLAY_CALL', 'SHORT_RUN', 'SHORT_RUN_CONT', 'LONG_RUN', 'LONG_RUN_ROLL', 'SHORT_PASS', 'SHORT_PASS_CONT', 'LONG_PASS', 'LONG_PASS_ROLL', 'BOMB', 'BOMB_ROLL', 'BOMB_CHOICE', 'SACK_CHOICE', 'SACK_ROLL', 'PICK_ROLL', 'DISTANCE_ROLL', 'PICK_TOUCHBACK_CHOICE', 'PICK_RETURN', 'PICK_RETURN_6', 'GAME_OVER'] as const;
+const _StateValues = ['COIN_TOSS', 'KICKOFF_ELECTION', 'KICKOFF_CHOICE', 'KICKOFF', 'ONSIDE_KICK', 'TOUCHBACK_CHOICE', 'KICK_RETURN', 'KICK_RETURN_1', 'KICK_RETURN_6', 'FUMBLE', 'PAT_CHOICE', 'EXTRA_POINT', 'EXTRA_POINT_2', 'PLAY_CALL', 'SHORT_RUN', 'SHORT_RUN_CONT', 'LONG_RUN', 'LONG_RUN_ROLL', 'SHORT_PASS', 'SHORT_PASS_CONT', 'LONG_PASS', 'LONG_PASS_ROLL', 'BOMB', 'BOMB_ROLL', 'BOMB_CHOICE', 'PUNT', 'FAKE_PUNT_CHOICE', 'PUNT_KICK', 'PUNT_BLOCK', 'SACK_CHOICE', 'SACK_ROLL', 'PICK_ROLL', 'DISTANCE_ROLL', 'PICK_TOUCHBACK_CHOICE', 'PICK_RETURN', 'PICK_RETURN_6', 'GAME_OVER'] as const;
 export type State = typeof _StateValues[number];
 export function isState(value: string): value is State {
     return _StateValues.includes(value as any);
 }
 
-const _PlayValues = ['SHORT_RUN', 'LONG_RUN', 'SHORT_PASS', 'LONG_PASS', 'BOMB'] as const;
+const _PlayValues = ['SHORT_RUN', 'LONG_RUN', 'SHORT_PASS', 'LONG_PASS', 'BOMB', 'PUNT'] as const;
 export type Play = typeof _PlayValues[number];
 export function isPlay(value: string): value is Play {
     return _PlayValues.includes(value as any);
@@ -52,6 +52,12 @@ const _PatChoiceValues = ['ONE_POINT', 'TWO_POINT'] as const;
 export type PatChoice = typeof _PatChoiceValues[number];
 export function isPatChoice(value: string): value is PatChoice {
     return _PatChoiceValues.includes(value as any);
+}
+
+const _FakeKickChoiceValues = ['FAKE', 'KICK'] as const;
+export type FakeKickChoice = typeof _FakeKickChoiceValues[number];
+export function isFakeKickChoice(value: string): value is FakeKickChoice {
+    return _FakeKickChoiceValues.includes(value as any);
 }
 
 const _SackChoiceValues = ['SACK', 'PICK'] as const;
@@ -105,7 +111,12 @@ export type SackChoiceAction = {
     choice: SackChoice;
 };
 
-export type Action = RspAction | RollAction | KickoffElectionAction | KickoffChoiceAction | CallPlayAction | TouchbackChoiceAction | RollAgainChoiceAction | PatChoiceAction | SackChoiceAction;
+export type FakeKickChoiceAction = {
+    name: 'FAKE_KICK_CHOICE';
+    choice: FakeKickChoice;
+};
+
+export type Action = RspAction | RollAction | KickoffElectionAction | KickoffChoiceAction | CallPlayAction | TouchbackChoiceAction | RollAgainChoiceAction | PatChoiceAction | SackChoiceAction | FakeKickChoiceAction;
 
 const _TurnoverTypeValues = ['DOWNS', 'PICK', 'FUMBLE'] as const;
 export type TurnoverType = typeof _TurnoverTypeValues[number];
@@ -171,12 +182,24 @@ export type IncompletePassResult = {
     name: 'INCOMPLETE';
 };
 
+export type CoffinCornerResult = {
+    name: 'COFFIN_CORNER';
+};
+
+export type FakeKickResult = {
+    name: 'FAKE_KICK';
+};
+
+export type BlockedKickResult = {
+    name: 'BLOCKED_KICK';
+};
+
 export type KickoffElectionResult = {
     name: 'KICK_ELECTION';
     choice: KickoffElectionChoice;
 };
 
-export type Result = RspResult | RollResult | ScoreResult | GainResult | LossResult | TurnoverResult | OutOfBoundsPassResult | OutOfBoundsKickResult | TouchbackResult | IncompletePassResult | KickoffElectionResult;
+export type Result = RspResult | RollResult | ScoreResult | GainResult | LossResult | TurnoverResult | OutOfBoundsPassResult | OutOfBoundsKickResult | TouchbackResult | IncompletePassResult | CoffinCornerResult | FakeKickResult | BlockedKickResult | KickoffElectionResult;
 
 export type Game = {
     gameId: string;

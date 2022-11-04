@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useRef, useState } from "react";
 
-import { GainResult, Game, IncompletePassResult, LossResult, OutOfBoundsKickResult, OutOfBoundsPassResult, Player, PlayerMap, TouchbackResult, TurnoverResult } from "model/rspModel";
+import { BlockedKickResult, CoffinCornerResult, FakeKickResult, GainResult, Game, IncompletePassResult, LossResult, OutOfBoundsKickResult, OutOfBoundsPassResult, Player, PlayerMap, TouchbackResult, TurnoverResult } from "model/rspModel";
 import { ComputedCallPlayResult, ComputedFumbleResult, ComputedKickoffElectionResult, ComputedOnsideKickResult, ComputedResult, ComputedRollResult, ComputedRspResult, ComputedScoreResult, computeResults } from "mappers/result";
 import { getLocalizedString } from "util/localization";
 
@@ -91,6 +91,12 @@ function ResultComponent({player, players, result}: ResultProps): JSX.Element {
             return <OnsideKickResultComponent player={player} players={players} result={result} />;
         case 'KICK_ELECTION':
             return <KickElectionResultComponent player={player} players={players} result={result} />;
+        case 'COFFIN_CORNER':
+                return <CoffinCornerResultComponent player={player} players={players} result={result} />;
+        case 'FAKE_KICK':
+            return <FakeKickResultComponent player={player} players={players} result={result} />;
+        case 'BLOCKED_KICK':
+            return <BlockedKickResultComponent player={player} players={players} result={result} />;
     }
 }
 
@@ -180,6 +186,18 @@ function KickElectionResultComponent({player, players, result}: ResultProps & {r
     const choice = result.choice.toLowerCase();
     const string = `${user} elected to ${choice}`;
     return <div>{string}</div>
+}
+
+function CoffinCornerResultComponent({player, players, result}: ResultProps & {result: CoffinCornerResult}) {
+    return <div>{getLocalizedString('COFFIN_CORNER')}</div>
+}
+
+function FakeKickResultComponent({player, players, result}: ResultProps & {result: FakeKickResult}) {
+    return <div>{getLocalizedString('FAKE_KICK')}</div>
+}
+
+function BlockedKickResultComponent({player, players, result}: ResultProps & {result: BlockedKickResult}) {
+    return <div>{getLocalizedString('BLOCKED_KICK')}</div>
 }
 
 function upperCaseWords(str: string) {

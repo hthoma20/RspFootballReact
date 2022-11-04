@@ -1,4 +1,4 @@
-import { GainResult, Game, IncompletePassResult, isPlay, KickoffElectionResult, LossResult, OutOfBoundsKickResult, OutOfBoundsPassResult, Play, Player, RollResult, ScoreType, TouchbackResult, TurnoverResult } from "model/rspModel";
+import { BlockedKickResult, CoffinCornerResult, FakeKickResult, GainResult, Game, IncompletePassResult, isPlay, KickoffElectionResult, LossResult, OutOfBoundsKickResult, OutOfBoundsPassResult, Play, Player, RollResult, ScoreType, TouchbackResult, TurnoverResult } from "model/rspModel";
 import { getOpponent } from "util/players";
 import { getRspWinner } from "util/rsp";
 
@@ -52,7 +52,10 @@ type MappedResult =
     | OutOfBoundsPassResult
     | OutOfBoundsKickResult
     | TouchbackResult
-    | IncompletePassResult;
+    | IncompletePassResult
+    | CoffinCornerResult
+    | FakeKickResult
+    | BlockedKickResult;
 
 type AdditionalResult = 
     ComputedCallPlayResult
@@ -103,6 +106,9 @@ function mapStoredResults(game: Game): MappedResult[] {
             case 'OOB_KICK':
             case 'TOUCHBACK':
             case 'INCOMPLETE':
+            case 'COFFIN_CORNER':
+            case 'FAKE_KICK':
+            case 'BLOCKED_KICK':
                 return result;
         }
     });

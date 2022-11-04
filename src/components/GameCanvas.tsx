@@ -389,6 +389,57 @@ function getRandomDieFace() {
     return Math.floor(Math.random()*6) + 1;
 }
 
+// Animate the ball to the endzone in case of a safety
+function* getSafetyBallAnimation(animationState: AnimationState, game: Game,
+    player: Player, canvasWidth: number) {
+
+    if (!animationState.ballpos) {
+        console.error("Expected animationState.ballpos to be non-null");
+        return;
+    }
+
+    const scoreResult = getResult(game, 'SCORE');
+    
+    const isSafety = scoreResult && scoreResult.type == 'SAFETY';
+
+    if (!isSafety) {
+        return;
+    }
+
+    const safetyBallPos = yardLineToPixels(-5, canvasWidth, game, player);
+    for (let ballpos of getTween(animationState.ballpos, safetyBallPos)) {
+        animationState.ballpos = ballpos;
+        yield;
+    }
+    const pause = 100;
+    animationState.text.safety = {text: "Safety!"};
+    for (let frame = 0; frame < pause; frame++) {
+        yield;
+    }
+    delete animationState.text.safety;
+    yield;
+}
+
+// animate the ball 10 yards back in case of a punt/field goal
+function* getKickBallAnimation(animationState: AnimationState, game: Game,
+    player: Player, canvasWidth: number) {
+
+    if (!animationState.ballpos) {
+        console.error("Expected animationState.ballpos to be non-null");
+        return;
+    }
+
+    const kickResult = getResult(game, 'FAKE_KICK');
+    if (!kickResult) {
+        return;
+    }
+
+    const kickBallPos = yardLineToPixels(game.ballpos - 10, canvasWidth, game, player);
+    for (let ballpos of getTween(animationState.ballpos, kickBallPos)) {
+        animationState.ballpos = ballpos;
+        yield;
+    }
+}
 
 function* getBallAnimation(animationState: AnimationState, game: Game, player: Player,
     canvasWidth: number): Animation {
@@ -400,23 +451,12 @@ function* getBallAnimation(animationState: AnimationState, game: Game, player: P
         return;
     }
 
-    const scoreResult = getResult(game, 'SCORE');
-    
-    const isSafety = scoreResult && scoreResult.type == 'SAFETY';
-    if (isSafety) {
-        const safetyBallPos = yardLineToPixels(-5, canvasWidth, game, player);
-        for (let ballpos of getTween(animationState.ballpos, safetyBallPos)) {
-            animationState.ballpos = ballpos;
-            yield;
-        }
-        const pause = 100;
-        animationState.text.safety = {text: "Safety!"};
-        for (let frame = 0; frame < pause; frame++) {
-            yield;
-        }
-        delete animationState.text.safety;
+    for (let frame of getSafetyBallAnimation(animationState, game, player, canvasWidth)) {
         yield;
-    }
+    }   
+    for (let frame of getKickBallAnimation(animationState, game, player, canvasWidth)) {
+        yield;
+    }     
 
     for (let ballpos of getTween(animationState.ballpos, pixelBallpos)) {
         animationState.ballpos = ballpos;

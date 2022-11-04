@@ -16,7 +16,12 @@ export function getDieCountChoices(game: Game) {
         case 'PICK_ROLL':
         case 'PICK_RETURN':
         case 'PICK_RETURN_6':
-            return [1];    
+        case 'PUNT_BLOCK':
+            return [1];
+        
+        case 'PUNT_KICK':
+            return [1, 2, 3]
+
         case 'DISTANCE_ROLL':
             switch (game.play) {
                 case 'LONG_PASS':

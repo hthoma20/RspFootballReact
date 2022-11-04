@@ -67,6 +67,9 @@ function ActionPane({game, player, dispatchAction}: ActionPaneProps & {player: P
     if (actions.includes('PAT_CHOICE')) {
         return <PatPane dispatchAction={dispatchAction} game={game} />;
     }
+    if (actions.includes('FAKE_KICK_CHOICE')) {
+        return <FakeKickPane dispatchAction={dispatchAction} game={game} />;
+    }
 
     return null;
 }
@@ -184,11 +187,12 @@ function CallPlayPane({dispatchAction, game}: ActionPaneProps) {
                 onHover={onHover}
                 gameVersion={game.version}
                 buttons={[
-                    {actionKey: 'SHORT_RUN', className: 'actionButton',  children: 'Short Run'},
-                    {actionKey: 'LONG_RUN', className: 'actionButton', children: 'Long Run'},
-                    {actionKey: 'SHORT_PASS', className: 'actionButton', children: 'Short Pass'},
-                    {actionKey: 'LONG_PASS', className: 'actionButton', children: 'Long Pass'},
-                    {actionKey: 'BOMB', className: 'actionButton', children: 'Bomb'}
+                    {actionKey: 'SHORT_RUN', className: 'actionButton',  children: 'SR'},
+                    {actionKey: 'LONG_RUN', className: 'actionButton', children: 'LR'},
+                    {actionKey: 'SHORT_PASS', className: 'actionButton', children: 'SP'},
+                    {actionKey: 'LONG_PASS', className: 'actionButton', children: 'LP'},
+                    {actionKey: 'BOMB', className: 'actionButton', children: 'B'},
+                    {actionKey: 'PUNT', className: 'actionButton', children: 'P'}
                 ]}
             />
         </div>
@@ -231,6 +235,19 @@ function PatPane({dispatchAction, game}: ActionPaneProps) {
         buttons={[
             {actionKey: 'ONE_POINT', className: 'actionButton', children: 'One Point'},
             {actionKey: 'TWO_POINT', className: 'actionButton', children: 'Two Point'}
+        ]}
+    />;
+}
+
+function FakeKickPane({dispatchAction, game}: ActionPaneProps) {
+    const dispatch = getChoiceActionDispatch(dispatchAction, 'FAKE_KICK_CHOICE');
+
+    return <ActionButtonGroup
+        onClick={dispatch}
+        gameVersion={game.version}
+        buttons={[
+            {actionKey: 'KICK', className: 'actionButton', children: 'Regular kick'},
+            {actionKey: 'FAKE', className: 'actionButton', children: 'Fake!'}
         ]}
     />;
 }
